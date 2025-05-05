@@ -1,0 +1,22 @@
+services:
+  talker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my/ros:app
+    command: ros2 run demo_nodes_cpp talker
+    networks:
+      - ros-net
+
+  listener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my/ros:app
+    command: ros2 run demo_nodes_py listener
+    networks:
+      - ros-net
+
+networks:
+  ros-net:
+    driver: bridge
