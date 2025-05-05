@@ -10,7 +10,7 @@ class MyNode(Node):
 
     @measure_execution_time
     def my_heavy_function(self):
-        time.sleep(0.3)  
+        time.sleep(0.6)  
 
     def timer_callback(self):
         self.my_heavy_function()

@@ -1,14 +1,16 @@
-import time
 import functools
-import rclpy
+from rclpy.clock import Clock
 from rclpy.logging import get_logger
+from builtin_interfaces.msg import Time as RosTime
 
 def measure_execution_time(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        start = time.time()
+        clock = Clock()  # Clock(ClockType.ROS_TIME) 
+        start = clock.now()
         result = func(*args, **kwargs)
-        duration = (time.time() - start) * 1000  
+        end = clock.now()
+        duration = (end - start).nanoseconds / 1e6 
         logger = get_logger('timer_execution')
         logger.info(f"Durée d'exécution de {func.__name__} : {duration:.2f} ms")
         return result
