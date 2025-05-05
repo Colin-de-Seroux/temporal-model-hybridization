@@ -1,56 +1,55 @@
 import rclpy
-from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
-
-from std_msgs.msg import String
+from rclpy.clock import Clock
 
 
 class Loop(Node):
 
-    def __init__(self):
-        super().__init__("loop")
-        self.i = 0
-        self.sum = 0
-        self.logger = self.get_logger()
-        self.test_loop()
+    def __init__(self, i):
+        super().__init__(f"loop{i}")
 
     def test_loop(self):
-        self.get_logger().info(f"<-->: {self.i + 1}")
-
-        start = self.get_clock().now()
-
         j = 0
 
-        while j < 50000:
+        while j < 100000:
             j += 1
         
-        end = self.get_clock().now()
-        duration_ms = (end - start).nanoseconds / 1e6
-        self.sum += duration_ms
-        self.logger.info(f"Duration: {duration_ms:.2f}ms")
-
-        if self.i < 29:
-            self.i += 1
-            self.test_loop()
-        else:
-            self.logger.info("Loop finished")
-            self.logger.info(f"Sum: {self.sum}")
-            self.logger.info(f"Average: {self.sum / self.i:.2f}")
+        return j
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = Loop()
+    nodes = []
+    nb_nodes = 30
 
-    try:
-        rclpy.spin(node)
-    except (KeyboardInterrupt, ExternalShutdownException):
-        pass
-    finally:
+    start = Clock().now().nanoseconds
+
+    for i in range(nb_nodes):
+        node = Loop(i)
+        nodes.append(node)
+    
+    end = Clock().now().nanoseconds
+    ms_creation = (end - start) / 1e6
+    print(f"Global creation time in {ms_creation / nb_nodes:2f} milliseconds")
+
+    start = Clock().now().nanoseconds
+
+    for node in nodes:
+        node.test_loop()
+        print(Clock().now().nanoseconds)
+
+    end = Clock().now().nanoseconds
+    ms_execution = (end - start) / 1e6
+    print(f"Global execution time in {ms_execution / nb_nodes:2f} milliseconds")
+
+    start = Clock().now().nanoseconds
+    
+    for node in nodes:
         node.destroy_node()
-        rclpy.try_shutdown()
 
+    end = Clock().now().nanoseconds
+    ms_destruction = (end - start) / 1e6
+    print(f"Global destruction time in {ms_destruction / nb_nodes:2f} milliseconds")
 
-if __name__ == "__main__":
-    main()
+    rclpy.shutdown()
