@@ -1,21 +1,31 @@
 services:
-  talker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: my/ros:app
-    command: ros2 run demo_nodes_cpp talker
-    networks:
-      - ros-net
+  #talker:
+   # build:
+    #  context: .
+     # dockerfile: Dockerfile
+    #image: my/ros:app
+    #command: ros2 run demo_nodes_cpp talker
+    #networks:
+     # - ros-net
 
-  listener:
+  #listener:
+   # build:
+    #  context: .
+     # dockerfile: Dockerfile
+   # image: my/ros:app
+    #command: ros2 run demo_nodes_py listener
+   # networks:
+    #  - ros-net
+  my_node:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile  
     image: my/ros:app
-    command: ros2 run demo_nodes_py listener
+    command: bash -c "source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 run timer_execution my_node"
     networks:
       - ros-net
+    volumes:
+      - ./src:/ros2_ws/src 
 
 networks:
   ros-net:
