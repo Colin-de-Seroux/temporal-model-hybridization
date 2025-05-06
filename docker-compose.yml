@@ -17,6 +17,7 @@ services:
    # networks:
     #  - ros-net
   temporal_execution:
+    container_name: temporal_execution
     build:
       context: src/temporal_execution
       dockerfile: Dockerfile  
@@ -31,6 +32,7 @@ services:
           memory: 200M
   
   loop:
+    container_name: loop
     build:
       context: src/loop
       dockerfile: Dockerfile  
