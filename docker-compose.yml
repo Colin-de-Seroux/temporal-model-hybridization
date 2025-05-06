@@ -1,109 +1,110 @@
 services:
-  loop:
-    container_name: loop
-    build:
-      context: ros2/src/loop
-      dockerfile: Dockerfile  
-    image: loop
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/loop/logs:/ros2_ws/.ros/log
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
+  # loop:
+  #   container_name: loop
+  #   build:
+  #     context: ros2/src/loop
+  #     dockerfile: Dockerfile  
+  #   image: loop
+  #   environment:
+  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
+  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
+  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+  #     - ROS_HOME=/ros2_ws/.ros
+  #   volumes:
+  #     - ./ros2/src/loop/logs:/ros2_ws/.ros/log
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 200M
+  #       reservations:
+  #         cpus: "1"
+  #         memory: 200M
 
-  temporal_execution:
-    container_name: temporal_execution
-    build:
-      context: ros2/src/temporal_execution
-      dockerfile: Dockerfile
-    image: temporal_execution
+  postgres:
+    image: postgres:latest
+    container_name: postgres
     environment:
-      - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
+      - POSTGRES_PASSWORD=123
+    ports:
+      - "5432:5432"
     volumes:
-      - ./ros2/src/temporal_execution/logs:/ros2_ws/.ros/log
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
+      - ./postgres/data:/var/lib/postgresql/data
+    networks:
+      tmh-net:
+        ipv4_address: 172.35.0.2
+
+  # temporal_execution:
+  #   container_name: temporal_execution
+  #   build:
+  #     context: ros2/src/temporal_execution
+  #     dockerfile: Dockerfile
+  #   image: temporal_execution
+  #   environment:
+  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
+  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
+  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+  #     - ROS_HOME=/ros2_ws/.ros
+  #   volumes:
+  #     - ./ros2/src/temporal_execution/logs:/ros2_ws/.ros/log
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 200M
+  #       reservations:
+  #         cpus: "1"
+  #         memory: 200M
+  
   temporal_time_series_ms:
-    image: temporal_time_series_ms:latest
+    image: temporal_time_series_ms
     build:
-      context: ./
-      dockerfile: ./temporal_time_series_ms/src/main/docker/Dockerfile.multistage
+      context: ./temporal_time_series_ms
+      dockerfile: Dockerfile
     container_name: temporal_time_series_ms
     environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_TOKEN=admin_token
-      - INFLUXDB_ORG=org
-      - INFLUXDB_BUCKET=bucket
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://172.35.0.2:5432/tts
     ports:
-      - 0.0.0.0:8081:8081
+      - "3001:3001"
+    depends_on:
+      - postgres
     networks:
-      - ros-net
-    
-  timer_execution:
-    container_name: timer_execution
-    build:
-      context: ros2/src/timer_execution
-      dockerfile: Dockerfile
-    image: timer_execution
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/timer_execution/logs:/ros2_ws/.ros/log
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
-    
-  influxdb:
-    image: influxdb:2.7
-    container_name: influxdb
-    ports:
-      - "8086:8086"
-    environment:
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: admin
-      DOCKER_INFLUXDB_INIT_PASSWORD: password
-      DOCKER_INFLUXDB_INIT_ORG: org
-      DOCKER_INFLUXDB_INIT_BUCKET: bucket
-      DOCKER_INFLUXDB_INIT_RETENTION: 30d
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: admin_token
+      tmh-net:
+        ipv4_address: 172.35.0.3
 
-    volumes:
-      - influxdb_data:/var/lib/influxdb
-    networks:
-      - ros-net
+  # timer_execution:
+  #   container_name: timer_execution
+  #   build:
+  #     context: ros2/src/timer_execution
+  #     dockerfile: Dockerfile
+  #   image: timer_execution
+  #   environment:
+  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
+  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
+  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+  #     - ROS_HOME=/ros2_ws/.ros
+  #   volumes:
+  #     - ./ros2/src/timer_execution/logs:/ros2_ws/.ros/log
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 200M
+  #       reservations:
+  #         cpus: "1"
+  #         memory: 200M
 
 
 volumes:
-  influxdb_data:
+  postgres:
+  tts-logs:
 
 
 networks:
-  ros-net:
+  tmh-net:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.35.0.0/16"
+          gateway: "172.35.0.1"

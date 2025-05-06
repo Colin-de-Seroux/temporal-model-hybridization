@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<CustomLevels>
+		<CustomLevel name="FUNCTION" intLevel="550" />
+	</CustomLevels>
+
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n" />
+		</Console>
+		<RollingFile name="fatal_log" fileName="Logs/fatal.log"
+			filePattern="Logs/fatal-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		<RollingFile name="error_log" fileName="Logs/error.log"
+			filePattern="Logs/error-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		<RollingFile name="warn_log" fileName="Logs/warn.log"
+			filePattern="Logs/warn-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		<RollingFile name="info_log" fileName="Logs/info.log"
+			filePattern="Logs/info-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		<RollingFile name="debug_log" fileName="Logs/debug.log"
+			filePattern="Logs/debug-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		<RollingFile name="function_log" fileName="Logs/function.log"
+			filePattern="Logs/function-%d{dd-MM-yyyy}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss,SSS} %t %p %c{1} %M -> %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="20MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<logger name="fr.pir" level="function" />
+
+		<Root level="warn">
+			<AppenderRef ref="fatal_log" level="fatal" />
+			<AppenderRef ref="error_log" level="error" />
+			<AppenderRef ref="warn_log" level="warn" />
+			<AppenderRef ref="info_log" level="info" />
+			<AppenderRef ref="debug_log" level="debug" />
+			<AppenderRef ref="function_log" level="function" />
+			<AppenderRef ref="STDOUT" level="function" />
+		</Root>
+	</Loggers>
+</Configuration>
