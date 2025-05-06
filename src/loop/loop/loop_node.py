@@ -37,7 +37,6 @@ def main(args=None):
 
     for node in nodes:
         node.test_loop()
-        print(Clock().now().nanoseconds)
 
     end = Clock().now().nanoseconds
     ms_execution = (end - start) / 1e6
@@ -51,5 +50,6 @@ def main(args=None):
     end = Clock().now().nanoseconds
     ms_destruction = (end - start) / 1e6
     print(f"Global destruction time in {ms_destruction / nb_nodes:2f} milliseconds")
-
+    print(f"Global time in {ms_creation + ms_execution + ms_destruction:2f} milliseconds")
+    
     rclpy.shutdown()
