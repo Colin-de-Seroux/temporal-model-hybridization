@@ -26,15 +26,34 @@ class LoopNode(Node):
         
         return j
 
+
+@measure_execution_time  
+def execution_nodes(nodes: list):
+    """
+    This function executes the test_loop method for a list of nodes.
+
+    :param nodes: A list of LoopNode instances.
+    :type nodes: list
+    """
+
+    for node in nodes:
+        node.test_loop()
+
+
 @measure_execution_time
 def main(args=None):
     rclpy.init(args=args)
 
+    nodes = []
     nb_nodes = 30
 
     for i in range(nb_nodes):
         node = LoopNode(i)
-        node.test_loop()
+        nodes.append(node)
+    
+    execution_nodes(nodes)
+
+    for node in nodes:
         node.destroy_node()
 
     rclpy.shutdown()
