@@ -10,12 +10,15 @@ RUN ln -s /opt/apache-maven-3.9.9 /opt/maven
 ENV PATH="/opt/maven/bin:${PATH}"
 USER quarkus
 WORKDIR /code
-RUN mvn -B -f /code/alert-management/pom.xml -DskipTests clean package -Dnative
+RUN ls -l /code
+
+RUN mvn -B -f /code/pom.xml -DskipTests clean package -Dnative
+
 
 ## Stage 2 : create the docker final image
 FROM quay.io/quarkus/quarkus-micro-image:2.0
 WORKDIR /work/
-COPY --from=build /code/alert-management/target/*-runner /work/application
+COPY --from=build /code/target/*-runner /work/application
 
 # set up permissions for user `1001`
 RUN chmod 775 /work /work/application \
