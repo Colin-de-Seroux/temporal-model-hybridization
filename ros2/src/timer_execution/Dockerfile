@@ -8,11 +8,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /ros2_ws
 
-COPY . /ros2_ws/loop
+# Create logs dir
+RUN mkdir -p /ros2_ws/.ros/log
 
+# Copy temporal_execution package
+COPY . /ros2_ws/src/timer_execution
+
+# Install dependencies
 RUN . /opt/ros/jazzy/setup.sh && \
     colcon build --merge-install
 
+# Source the workspace, install dependencies and run the node
 CMD . /opt/ros/jazzy/setup.sh && \
     . /ros2_ws/install/setup.sh && \
-    ros2 run loop loop_node
+    ros2 run timer_execution my_node > /dev/null 2>&1

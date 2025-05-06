@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.clock import Clock
+from rclpy.logging import get_logger
 
 
 class Loop(Node):
@@ -19,6 +20,7 @@ class Loop(Node):
 
 def main(args=None):
     rclpy.init(args=args)
+    logger = get_logger("loop_node")
 
     nodes = []
     nb_nodes = 30
@@ -31,7 +33,7 @@ def main(args=None):
     
     end = Clock().now().nanoseconds
     ms_creation = (end - start) / 1e6
-    print(f"Global creation time in {ms_creation / nb_nodes:2f} milliseconds")
+    logger.info(f"Global creation time in {ms_creation / nb_nodes:2f} milliseconds")
 
     start = Clock().now().nanoseconds
 
@@ -40,7 +42,7 @@ def main(args=None):
 
     end = Clock().now().nanoseconds
     ms_execution = (end - start) / 1e6
-    print(f"Global execution time in {ms_execution / nb_nodes:2f} milliseconds")
+    logger.info(f"Global execution time in {ms_execution / nb_nodes:2f} milliseconds")
 
     start = Clock().now().nanoseconds
     
@@ -49,7 +51,7 @@ def main(args=None):
 
     end = Clock().now().nanoseconds
     ms_destruction = (end - start) / 1e6
-    print(f"Global destruction time in {ms_destruction / nb_nodes:2f} milliseconds")
-    print(f"Global time in {ms_creation + ms_execution + ms_destruction:2f} milliseconds")
+    logger.info(f"Global destruction time in {ms_destruction / nb_nodes:2f} milliseconds")
+    logger.info(f"Global time in {(ms_creation + ms_execution + ms_destruction) / nb_nodes:2f} milliseconds")
     
     rclpy.shutdown()
