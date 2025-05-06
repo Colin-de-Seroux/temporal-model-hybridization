@@ -1,0 +1,15 @@
+{
+    "projectName": "RosAml",
+    "languages": [{
+        "id": "ros-aml",
+        "grammar": "src/language/ros-aml.langium",
+        "fileExtensions": [".rosaml"],
+        "textMate": {
+            "out": "syntaxes/ros-aml.tmLanguage.json"
+        },
+        "monarch": {
+            "out": "src/syntaxes/ros-aml.monarch.ts"
+        }
+    }],
+    "out": "src/language/generated"
+}
