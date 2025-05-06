@@ -42,6 +42,21 @@ services:
         reservations:
           cpus: "1"
           memory: 200M
+  temporal_time_series_ms:
+    image: temporal_time_series_ms:latest
+    build:
+      context: ./
+      dockerfile: ./temporal_time_series_ms/src/main/docker/Dockerfile.multistage
+    container_name: temporal_time_series_ms
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=admin_token
+      - INFLUXDB_ORG=org
+      - INFLUXDB_BUCKET=bucket
+    ports:
+      - 0.0.0.0:8081:8081
+    networks:
+      - ros-net
     
   timer_execution:
     container_name: timer_execution
