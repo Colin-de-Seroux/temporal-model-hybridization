@@ -16,23 +16,32 @@ services:
     #command: ros2 run demo_nodes_py listener
    # networks:
     #  - ros-net
-  my_node:
+  temporal_execution:
     build:
       context: src/temporal_execution
       dockerfile: Dockerfile  
-    image: my/ros:app
-    command: bash -c "source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 run temporal_execution loop_node"
-    networks:
-      - ros-net
-    volumes:
-      - ./src:/ros2_ws/src 
+    image: temporal_execution
     deploy:
       resources:
         limits:
-          cpus: '0.25'
+          cpus: "1"
           memory: 200M
         reservations:
-          cpus: '0.25'
+          cpus: "1"
+          memory: 200M
+  
+  loop:
+    build:
+      context: src/loop
+      dockerfile: Dockerfile  
+    image: loop
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 200M
+        reservations:
+          cpus: "1"
           memory: 200M
 
 networks:
