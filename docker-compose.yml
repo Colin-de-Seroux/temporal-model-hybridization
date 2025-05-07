@@ -1,25 +1,4 @@
 services:
-  # loop:
-  #   container_name: loop
-  #   build:
-  #     context: ros2/src/loop
-  #     dockerfile: Dockerfile  
-  #   image: loop
-  #   environment:
-  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-  #     - ROS_HOME=/ros2_ws/.ros
-  #   volumes:
-  #     - ./ros2/src/loop/logs:/ros2_ws/.ros/log
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 200M
-  #       reservations:
-  #         cpus: "1"
-  #         memory: 200M
 
   postgres:
     image: postgres:latest
@@ -71,28 +50,6 @@ services:
     networks:
       tmh-net:
         ipv4_address: 172.35.0.3
-
-  # timer_execution:
-  #   container_name: timer_execution
-  #   build:
-  #     context: ros2/src/timer_execution
-  #     dockerfile: Dockerfile
-  #   image: timer_execution
-  #   environment:
-  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-  #     - ROS_HOME=/ros2_ws/.ros
-  #   volumes:
-  #     - ./ros2/src/timer_execution/logs:/ros2_ws/.ros/log
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 200M
-  #       reservations:
-  #         cpus: "1"
-  #         memory: 200M
 
 
 volumes:
