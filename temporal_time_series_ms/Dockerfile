@@ -13,6 +13,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 RUN mkdir Logs
+RUN mkdir TE_logs
 
 COPY --from=build /app/target/temporal-time-series-ms-0.0.1-SNAPSHOT.jar .
 

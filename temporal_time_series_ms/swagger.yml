@@ -57,3 +57,42 @@ paths:
               schema:
                 type: string
                 example: Hello World!
+
+  /api/logs:
+    post:
+      summary: Read, process and save logs
+      operationId: readProcessSaveLogs
+      parameters:
+        - name: pathFolder
+          in: query
+          description: The path to the folder containing the log files
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Log files read, process and save successfully.
+        "400":
+          description: Path folder incorrect
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: BAD_REQUEST
+                  message:
+                    type: string
+                    example: Path folder incorrect.
