@@ -21,4 +21,4 @@ RUN . /opt/ros/jazzy/setup.sh && \
 # Source the workspace, install dependencies and run the node
 CMD . /opt/ros/jazzy/setup.sh && \
     . /ros2_ws/install/setup.sh && \
-    ros2 run temporal_execution loop_node > /dev/null 2>&1
+    ros2 run temporal_execution loop_node

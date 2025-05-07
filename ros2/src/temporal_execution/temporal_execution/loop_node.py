@@ -1,59 +1,48 @@
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
+
 from temporal_execution.timer_execution import measure_execution_time
 
+from std_msgs.msg import Int32
 
 class LoopNode(Node):
 
-    def __init__(self, i: int):
-        super().__init__(f"loop{i}")
+    def __init__(self):
+        super().__init__(f"loop")
+
+        self.pub = self.create_publisher(Int32, "loop", 10)
+        timer_period = 0.1
+        self.tmr = self.create_timer(timer_period, self.timer_callback)
 
     @measure_execution_time
-    def test_loop(self) -> int:
+    def timer_callback(self):
         """
-        This function simulates a loop that runs 100,000 iterations.
+        This function simulates a loop that runs 1 000 000 iterations.
         It is decorated with the measure_execution_time decorator to log
         the execution time.
-
-        :return: The final value of j after the loop completes.
-        :rtype: int
         """
 
         j = 0
 
-        while j < 100000:
+        while j < 1000000:
             j += 1
         
-        return j
+        msg = Int32()
+        msg.data = j
+        
+        self.pub.publish(msg)
 
 
-@measure_execution_time  
-def execution_nodes(nodes: list):
-    """
-    This function executes the test_loop method for a list of nodes.
-
-    :param nodes: A list of LoopNode instances.
-    :type nodes: list
-    """
-
-    for node in nodes:
-        node.test_loop()
-
-
-@measure_execution_time
 def main(args=None):
     rclpy.init(args=args)
 
-    nodes = []
-    nb_nodes = 30
+    node = LoopNode()
 
-    for i in range(nb_nodes):
-        node = LoopNode(i)
-        nodes.append(node)
-    
-    execution_nodes(nodes)
-
-    for node in nodes:
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
         node.destroy_node()
-
-    rclpy.shutdown()
+        rclpy.try_shutdown()

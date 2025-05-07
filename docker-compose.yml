@@ -1,55 +1,56 @@
 services:
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      - POSTGRES_PASSWORD=123
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./postgres/data:/var/lib/postgresql/data
-    networks:
-      tmh-net:
-        ipv4_address: 172.35.0.2
-
-  # temporal_execution:
-  #   container_name: temporal_execution
-  #   build:
-  #     context: ros2/src/temporal_execution
-  #     dockerfile: Dockerfile
-  #   image: temporal_execution
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: postgres
   #   environment:
-  #     - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
-  #     - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
-  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-  #     - ROS_HOME=/ros2_ws/.ros
+  #     - POSTGRES_PASSWORD=123
+  #   ports:
+  #     - "5432:5432"
   #   volumes:
-  #     - ./ros2/src/temporal_execution/logs:/ros2_ws/.ros/log
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 200M
-  #       reservations:
-  #         cpus: "1"
-  #         memory: 200M
-  
-  temporal_time_series_ms:
-    image: temporal_time_series_ms
+  #     - ./postgres/data:/var/lib/postgresql/data
+  #   networks:
+  #     tmh-net:
+  #       ipv4_address: 172.35.0.2
+
+  temporal_execution:
+    container_name: temporal_execution
     build:
-      context: ./temporal_time_series_ms
+      context: ros2/src/temporal_execution
       dockerfile: Dockerfile
-    container_name: temporal_time_series_ms
+    image: temporal_execution
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://172.35.0.2:5432/tts
-    ports:
-      - "3001:3001"
-    depends_on:
-      - postgres
-    networks:
-      tmh-net:
-        ipv4_address: 172.35.0.3
+      - RCUTILS_LOGGING_USE_STDERR=0      # Logs STDERR
+      - RCUTILS_LOGGING_USE_STDOUT=0      # Logs STDOUT
+      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+      - ROS_HOME=/ros2_ws/.ros
+    command: /bin/bash -c ". /opt/ros/jazzy/setup.sh && . /ros2_ws/install/setup.sh && ros2 run temporal_execution loop_node > /dev/null 2>&1"
+    volumes:
+      - ./ros2/src/temporal_execution/logs:/ros2_ws/.ros/log
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 200M
+        reservations:
+          cpus: "1"
+          memory: 200M
+  
+  # temporal_time_series_ms:
+  #   image: temporal_time_series_ms
+  #   build:
+  #     context: ./temporal_time_series_ms
+  #     dockerfile: Dockerfile
+  #   container_name: temporal_time_series_ms
+  #   environment:
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://172.35.0.2:5432/tts
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     tmh-net:
+  #       ipv4_address: 172.35.0.3
 
 
 volumes:
