@@ -22,7 +22,9 @@
         "dev": "vite",
         "dev:debug": "vite --debug --force",
         "serve": "npm run dev",
-        "test": "vitest run"
+        "test": "vitest run",
+        "cli:info": "node ./bin/cli",
+        "cli": "node ./bin/cli generate --destination ../demo/generated/"
     },
     "dependencies": {
         "langium": "~3.5.0",
