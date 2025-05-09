@@ -6,18 +6,17 @@ entry Model:
 Node:
     'node' name=ID 
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    "["
-        (publishers+=Publisher |subscribers+=Subscriber | services+=Service)*
-    "]";
+    (publishers+=Publisher |subscribers+=Subscriber | services+=Service)*
+    ;
 
 Publisher:
-    'publish' topicName=ID 'type' msgType=ID;
+    'publish' topicName=ID 'type' msgType=ID 'message' msg=STRING;
 
 Subscriber:
-    'subscribe' topicName=ID 'type' msgType=ID;
+    'subscribe' topicName=ID 'type' msgType=ID msg=STRING;
 
 Service:
-    'service' serviceName=ID 'ofType' srvType=ID;
+    'service' serviceName=ID 'type' srvType=ID;
 
 
 terminal ID: /[_a-zA-Z][\w_]*/;

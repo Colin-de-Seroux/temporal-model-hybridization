@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { RosAmlAstType, Person } from './generated/ast.js';
+import type {Node, RosAmlAstType } from './generated/ast.js';
 import type { RosAmlServices } from './ros-aml-module.js';
 
 /**
@@ -9,7 +9,7 @@ export function registerValidationChecks(services: RosAmlServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.RosAmlValidator;
     const checks: ValidationChecks<RosAmlAstType> = {
-        Person: validator.checkPersonStartsWithCapital
+        Node: validator.checkPersonStartsWithCapital
     };
     registry.register(checks, validator);
 }
@@ -19,11 +19,11 @@ export function registerValidationChecks(services: RosAmlServices) {
  */
 export class RosAmlValidator {
 
-    checkPersonStartsWithCapital(person: Person, accept: ValidationAcceptor): void {
-        if (person.name) {
-            const firstChar = person.name.substring(0, 1);
-            if (firstChar.toUpperCase() !== firstChar) {
-                accept('warning', 'Person name should start with a capital.', { node: person, property: 'name' });
+    checkPersonStartsWithCapital(node: Node, accept: ValidationAcceptor): void {
+        if (node.name) {
+            const firstChar = node.name.substring(0, 1);
+            if (firstChar.toLowerCase() !== firstChar) {
+                accept('warning', 'Node name should start with a minuscule.', { node: node, property: 'name' });
             }
         }
     }

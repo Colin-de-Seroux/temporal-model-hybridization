@@ -1,0 +1,6 @@
+node test 
+expectedExecTime 0.22 ms
+publish pub type string message 'hello  world'
+node subscriberTest expectedExecTime 0.22 ms
+subscribe sub type string 'I received hello  world'
+publish pub type string message 'puvblish 2'
