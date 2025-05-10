@@ -1,4 +1,4 @@
-import {  Publisher, Subscriber, type Model, type Node } from '../language/generated/ast.js';
+import {  Action, Publisher, Service, Subscriber, type Model, type Node } from '../language/generated/ast.js';
 import { CompositeGeneratorNode,  toString } from 'langium/generate';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -8,6 +8,7 @@ import { generateEntrypoint } from './generator_files/entrypoint_generator.js';
 import { generatePackageXml } from './generator_files/xml_generator.js';
 import { generateSetupCfg, generateSetupPy } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
+import { generateLaunchFile } from './generator_files/launch_generation.js';
 
 export function generateRosScript(model: Model, filePath: string, destination: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
@@ -33,12 +34,18 @@ export function generateRosScript(model: Model, filePath: string, destination: s
     fs.writeFileSync(path.join(rootPath, 'resource', pkgName), '');
     fs.writeFileSync(path.join(rootPath, 'Dockerfile'), generateDockerfile(pkgName));
     fs.writeFileSync(path.join(rootPath, 'entrypoint.sh'), generateEntrypoint(pkgName));
+    fs.mkdirSync(path.join(rootPath, 'launch'), { recursive: true });
+    fs.writeFileSync(path.join(rootPath, 'launch', `${pkgName}_launch.py`), generateLaunchFile(pkgName, pkgName));
+
 
     return rootPath;
 }
 
 function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
+
+    const constructorBody = new CompositeGeneratorNode();
+    const methods = new CompositeGeneratorNode();
 
     nodeBlock.append(`import rclpy`);
     nodeBlock.appendNewLine();
@@ -63,14 +70,37 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
 
 
     node.publishers?.forEach(pub => {
-        nodeBlock.append(compilePublisher(pub));
-        nodeBlock.appendNewLine();
+        constructorBody.append(compilePublisher(pub));
+        constructorBody.appendNewLine();
     });
 
     node.subscribers?.forEach(sub => {
-        nodeBlock.append(compileSubscriber(sub));
-        nodeBlock.appendNewLine();
+        const [initCode, methodCode] = compileSubscriber(sub);
+        constructorBody.append(initCode);
+        constructorBody.appendNewLine();
+        methods.append(methodCode);
+        methods.appendNewLine();
     });
+
+    node.services?.forEach(service => {
+    const [initCode, methodCode] = compileService(service);
+    constructorBody.append(initCode);
+    constructorBody.appendNewLine();
+    methods.append(methodCode);
+    methods.appendNewLine();
+    });
+
+    node.actions?.forEach(action => {
+        const [initCode, methodCode] = compileAction(action);
+        constructorBody.append(initCode);
+        constructorBody.appendNewLine();
+        methods.append(methodCode);
+        methods.appendNewLine();
+    });
+
+    nodeBlock.append(constructorBody);
+    nodeBlock.append(methods);
+
     nodeBlock.appendNewLine();
     nodeBlock.append(`
 def main(args=None):
@@ -86,10 +116,7 @@ def main(args=None):
 `);
     return nodeBlock;
 
-}
-
-
-    
+}   
 
 function compilePublisher(pub: Publisher): CompositeGeneratorNode {
     const node = new CompositeGeneratorNode();
@@ -98,18 +125,74 @@ function compilePublisher(pub: Publisher): CompositeGeneratorNode {
     return node;
 }
 
-function compileSubscriber(sub: Subscriber): CompositeGeneratorNode {
-    const node = new CompositeGeneratorNode();
+function compileSubscriber(sub: Subscriber): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const method = new CompositeGeneratorNode();
     const type = sub.msgType.split('.').at(-1) ?? sub.msgType;
-    node.append(`        self.subscription_${sub.topicName} = self.create_subscription(${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`);
-    return node;
+
+    init.append(`        self.subscription_${sub.topicName} = self.create_subscription(`);
+    init.append(`${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`);
+    init.appendNewLine();
+
+    method.append(`    def listener_callback_${sub.topicName}(self, msg):`);
+    method.appendNewLine();
+    method.append(`        self.get_logger().info('${sub.msg}')`);
+    method.appendNewLine();
+
+    return [init, method];
 }
 
 
-/*function compileService(service: Service, fileNode: CompositeGeneratorNode): void {
-    fileNode.append(`import rclpy`);
+function compileService(service: Service): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const method = new CompositeGeneratorNode();
+    const type = service.srvType.split('.').at(-1) ?? service.srvType;
 
-}*/
+    init.append(`        self.service_${service.serviceName} = self.create_service(`);
+    init.append(`${type}, '${service.serviceName}', self.handle_${service.serviceName})`);
+    init.appendNewLine();
+
+    method.append(`    def handle_${service.serviceName}(self, request, response):`);
+    method.appendNewLine();
+    method.append(`        # TODO: Implement service logic`);
+    method.appendNewLine();
+    method.append(`        return response`);
+    method.appendNewLine();
+
+    return [init, method];
+}
+
+
+function compileAction(action: Action): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const method = new CompositeGeneratorNode();
+    const type = action.actionType.split('.').at(-1) ?? action.actionType;
+
+    init.append(`        # Action server for ${action.actionName}`);
+    init.appendNewLine();
+    init.append(`        self.action_server_${action.actionName} = rclpy.action.ActionServer(`);
+    init.appendNewLine();
+    init.append(`            self, ${type}, '${action.actionName}', self.execute_${action.actionName})`);
+    init.appendNewLine();
+
+    method.append(`    def execute_${action.actionName}(self, goal_handle):`);
+    method.appendNewLine();
+    method.append(`        self.get_logger().info('Executing goal: ${action.goal}')`);
+    method.appendNewLine();
+    method.append(`        # TODO: Add feedback publishing`);
+    method.appendNewLine();
+    method.append(`        goal_handle.succeed()`);
+    method.appendNewLine();
+    method.append(`        result = ${type}.Result()`);
+    method.appendNewLine();
+    method.append(`        result.result = "${action.result}"`);
+    method.appendNewLine();
+    method.append(`        return result`);
+    method.appendNewLine();
+
+    return [init, method];
+}
+
 
 
 

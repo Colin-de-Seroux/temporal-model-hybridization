@@ -8,8 +8,8 @@ setup(
     packages=find_packages(exclude=[]),
     data_files=[
         ('share/ament_index/resource_index/packages', 
-            ['resource/' + pkgName]),
-        ('share/'+pkgName, ['package.xml']),
+            ['resource/' + package_name]),
+        ('share/'+package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -20,8 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'test = test.test:main',
-            'subscribertest = test.subscriberTest:main'
+            'talker = test.talker:main',
+            'listeningistener = test.listeningistener:main',
+            'servicehandler = test.serviceHandler:main',
+            'actionexecutor = test.actionExecutor:main'
         ],
     },
 )
