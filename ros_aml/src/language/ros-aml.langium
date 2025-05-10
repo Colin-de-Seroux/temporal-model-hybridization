@@ -6,7 +6,7 @@ entry Model:
 Node:
     'node' name=ID 
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    (publishers+=Publisher |subscribers+=Subscriber | services+=Service)*
+    (publishers+=Publisher |subscribers+=Subscriber | services+=Service | actions+=Action)*
     ;
 
 Publisher:
@@ -18,6 +18,12 @@ Subscriber:
 Service:
     'service' serviceName=ID 'type' srvType=ID;
 
+Action:
+    'action' actionName=ID 'type' actionType=ID
+    'goal' goal=STRING
+    'result' result=STRING
+    'feedback' feedback=STRING
+    ;
 
 terminal ID: /[_a-zA-Z][\w_]*/;
 terminal INT returns number: /[0-9]+/;

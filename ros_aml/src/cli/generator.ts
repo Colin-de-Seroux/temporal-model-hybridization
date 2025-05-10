@@ -3,6 +3,11 @@ import { CompositeGeneratorNode,  toString } from 'langium/generate';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { extractDestinationAndName } from './cli-util.js';
+import { generateDockerfile } from './generator_files/docker_file_generator.js';
+import { generateEntrypoint } from './generator_files/entrypoint_generator.js';
+import { generatePackageXml } from './generator_files/xml_generator.js';
+import { generateSetupCfg, generateSetupPy } from './generator_files/setup_generator.js';
+import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 
 export function generateRosScript(model: Model, filePath: string, destination: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
@@ -30,149 +35,6 @@ export function generateRosScript(model: Model, filePath: string, destination: s
     fs.writeFileSync(path.join(rootPath, 'entrypoint.sh'), generateEntrypoint(pkgName));
 
     return rootPath;
-}
-
-function generateSetupPy(pkgName: string, model: Model): string {
-    return `
-from setuptools import find_packages,setup
-
-package_name = '${pkgName}'
-
-setup(
-    name=package_name,
-    version='0.0.1',
-    packages=find_packages(exclude=[]),
-    data_files=[
-        ('share/ament_index/resource_index/packages', 
-            ['resource/' + pkgName]),
-        ('share/'+pkgName, ['package.xml']),
-    ],
-    install_requires=['setuptools'],
-    zip_safe=True,
-    maintainer='auto-generated',
-    maintainer_email='noreply@example.com',
-    description='Auto-generated ROS 2 package',
-    license="Apache 2.0",
-    tests_require=['pytest'],
-    entry_points={
-        'console_scripts': [
-            ${model.nodes.map(n => `'${n.name.toLowerCase()} = ${pkgName}.${n.name}:main'`).join(',\n            ')}
-        ],
-    },
-)
-`.trim();
-}
-
-function generateSetupCfg(pkgName: string): string {
-    return `
-[develop]
-script_dir=$base/lib/${pkgName}
-[install]
-install_scripts=$base/lib/${pkgName}
-`.trim();
-}
-
-function generatePackageXml(pkgName: string): string {
-    return `
-<package format="3">
-  <name>${pkgName}</name>
-  <version>0.0.1</version>
-  <description>Auto-generated ROS 2 package</description>
-  <maintainer email="noreply@example.com">Auto Generator</maintainer>
-  <license>Apache-2.0</license>
-
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>python3</exec_depend>
-
-  <export>
-    <build_type>ament_python</build_type>
-  </export>
-</package>
-`.trim();
-}
-
-function generateDockerfile(pkgName: string): string {
-    return `
-FROM ros:jazzy
-
-RUN apt-get update && apt-get install -y \\
-    python3-colcon-common-extensions \\
-    python3-pip \\
-    build-essential \\
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /ros2_ws
-
-# Create logs dir
-RUN mkdir -p /ros2_ws/.ros/log
-
-# Copy ${pkgName} package
-COPY . /ros2_ws/src/${pkgName}
-
-# Install dependencies
-RUN . /opt/ros/jazzy/setup.sh && \\
-    colcon build --merge-install
-
-# New entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Source the workspace, install dependencies and run the node
-CMD . /opt/ros/jazzy/setup.sh && \\
-    . /ros2_ws/install/setup.sh && \\
-    ros2 run ${pkgName} ${pkgName}
-`.trim();
-}
-
-function generateEntrypoint(pkgName: string): string {
-    return `
-#!/bin/bash
-
-LOG_DIR="/ros2_ws/.ros/log"
-BACKUP_DIR="/ros_logs_backup"
-
-function save_logs {
-    echo "Saving ROS2 logs to disk..."
-    mkdir -p "$BACKUP_DIR"
-    cp -r "$LOG_DIR"/* "$BACKUP_DIR"/
-    echo "Logs saved to $BACKUP_DIR."
-}
-
-# Set trap to call save_logs on exit
-trap save_logs EXIT
-
-# Run ROS2 node
-echo "Starting ROS2 node..."
-source /opt/ros/jazzy/setup.sh
-source /ros2_ws/install/setup.sh
-ros2 run ${pkgName} ${pkgName} > /dev/null 2>&1
-`.trim();
-}
-
-function generateTimerExecutionPy(): string {
-    return `
-import functools
-from rclpy.clock import Clock
-from rclpy.logging import get_logger
-
-def measure_execution_time(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        logger = get_logger("timer_execution")
-        try:
-            clock = Clock()
-            start = clock.now()
-            result = func(*args, **kwargs)
-            end = clock.now()
-            duration = (end - start).nanoseconds / 1e6
-            logger.info(f"Time execution of function {func.__name__} : {duration:.2f} ms")
-            return result
-        except Exception as e:
-            logger.error(f"Error in {func.__name__}: {e}")
-            raise
-    return wrapper
-`.trim();
 }
 
 function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
