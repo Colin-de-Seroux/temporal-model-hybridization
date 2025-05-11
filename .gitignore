@@ -1,4 +1,11 @@
-logs*
+# IDE
 .idea/
-postgres
-.vscode
+.vscode/
+.metadata/
+
+# Postgres
+/postgres/data/
+
+.env
+
+logs*
