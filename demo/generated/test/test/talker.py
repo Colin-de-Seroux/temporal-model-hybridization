@@ -7,7 +7,7 @@ from test.timer_execution import measure_execution_time
 class talkerNode(Node):
     def __init__(self):
         super().__init__('talker')
-        self.publisher_chatter = self.create_publisher(string, 'chatter', 10)
+        self.publisher_chatter = self.create_publisher(String, 'chatter', 10)
         self.service_echo_service = self.create_service(AddTwoInts, 'echo_service', self.handle_echo_service)
 
         # Action server for nav_to_goal

@@ -9,6 +9,7 @@ import { generatePackageXml } from './generator_files/xml_generator.js';
 import { generateSetupCfg, generateSetupPy } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
+import { resolveMessageType } from './utils/utils.js';
 
 export function generateRosScript(model: Model, filePath: string, destination: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
@@ -120,7 +121,7 @@ def main(args=None):
 
 function compilePublisher(pub: Publisher): CompositeGeneratorNode {
     const node = new CompositeGeneratorNode();
-    const type = pub.msgType.split('.').at(-1) ?? pub.msgType;
+    const type = resolveMessageType(pub.msgType, pub.msg);
     node.append(`        self.publisher_${pub.topicName} = self.create_publisher(${type}, '${pub.topicName}', 10)`);
     return node;
 }
@@ -128,7 +129,8 @@ function compilePublisher(pub: Publisher): CompositeGeneratorNode {
 function compileSubscriber(sub: Subscriber): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
-    const type = sub.msgType.split('.').at(-1) ?? sub.msgType;
+    const type = resolveMessageType(sub.msgType, sub.msg);
+
 
     init.append(`        self.subscription_${sub.topicName} = self.create_subscription(`);
     init.append(`${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`);
@@ -146,7 +148,7 @@ function compileSubscriber(sub: Subscriber): [CompositeGeneratorNode, CompositeG
 function compileService(service: Service): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
-    const type = service.srvType.split('.').at(-1) ?? service.srvType;
+    const type = service.srvType?.split('.').at(-1) ?? 'DefaultServiceType';
 
     init.append(`        self.service_${service.serviceName} = self.create_service(`);
     init.append(`${type}, '${service.serviceName}', self.handle_${service.serviceName})`);
@@ -166,7 +168,7 @@ function compileService(service: Service): [CompositeGeneratorNode, CompositeGen
 function compileAction(action: Action): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
-    const type = action.actionType.split('.').at(-1) ?? action.actionType;
+    const type = action.actionType?.split('.').at(-1) ?? 'DefaultActionType';
 
     init.append(`        # Action server for ${action.actionName}`);
     init.appendNewLine();
