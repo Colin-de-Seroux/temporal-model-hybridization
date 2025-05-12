@@ -10,7 +10,10 @@ import { CompositeGeneratorNode, toString } from 'langium/generate';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { extractDestinationAndName } from './cli-util.js';
-import { generateDockerfile } from './generator_files/docker_file_generator.js';
+import {
+    generateDockerfile,
+    generateDockerComposePart,
+} from './generator_files/docker_file_generator.js';
 import { generateEntrypoint } from './generator_files/entrypoint_generator.js';
 import { generatePackageXml } from './generator_files/xml_generator.js';
 import {
@@ -61,6 +64,10 @@ export function generateRosScript(
     fs.writeFileSync(
         path.join(rootPath, 'Dockerfile'),
         generateDockerfile(pkgName)
+    );
+    fs.writeFileSync(
+        path.join(rootPath, 'docker-compose.yml'),
+        generateDockerComposePart(pkgName)
     );
     fs.writeFileSync(
         path.join(rootPath, 'entrypoint.sh'),
