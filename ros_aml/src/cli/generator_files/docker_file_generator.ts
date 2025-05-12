@@ -1,4 +1,7 @@
-export function generateDockerfile(pkgName: string, rosVersion: string = 'jazzy'): string {
+export function generateDockerfile(
+    pkgName: string,
+    rosVersion: string = 'jazzy'
+): string {
     return `
 FROM ros:${rosVersion}
 

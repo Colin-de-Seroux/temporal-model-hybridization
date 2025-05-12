@@ -1,10 +1,19 @@
-import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
+import {
+    MonacoEditorLanguageClientWrapper,
+    UserConfig,
+} from 'monaco-editor-wrapper';
 import { configureWorker, defineUserServices } from './setupCommon.js';
 
 export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
-    extensionFilesOrContents.set('/language-configuration.json', new URL('../language-configuration.json', import.meta.url));
-    extensionFilesOrContents.set('/ros-aml-grammar.json', new URL('../syntaxes/ros-aml.tmLanguage.json', import.meta.url));
+    extensionFilesOrContents.set(
+        '/language-configuration.json',
+        new URL('../language-configuration.json', import.meta.url)
+    );
+    extensionFilesOrContents.set(
+        '/ros-aml-grammar.json',
+        new URL('../syntaxes/ros-aml.tmLanguage.json', import.meta.url)
+    );
 
     return {
         wrapperConfig: {
@@ -14,40 +23,45 @@ export const setupConfigExtended = (): UserConfig => {
                 languageId: 'ros-aml',
                 code: `// ros_aml is running in the web!`,
                 useDiffEditor: false,
-                extensions: [{
-                    config: {
-                        name: 'ros-aml-web',
-                        publisher: 'generator-langium',
-                        version: '1.0.0',
-                        engines: {
-                            vscode: '*'
-                        },
-                        contributes: {
-                            languages: [{
-                                id: 'ros-aml',
-                                extensions: [
-                                    '.ros-aml'
+                extensions: [
+                    {
+                        config: {
+                            name: 'ros-aml-web',
+                            publisher: 'generator-langium',
+                            version: '1.0.0',
+                            engines: {
+                                vscode: '*',
+                            },
+                            contributes: {
+                                languages: [
+                                    {
+                                        id: 'ros-aml',
+                                        extensions: ['.ros-aml'],
+                                        configuration:
+                                            './language-configuration.json',
+                                    },
                                 ],
-                                configuration: './language-configuration.json'
-                            }],
-                            grammars: [{
-                                language: 'ros-aml',
-                                scopeName: 'source.ros-aml',
-                                path: './ros-aml-grammar.json'
-                            }]
-                        }
+                                grammars: [
+                                    {
+                                        language: 'ros-aml',
+                                        scopeName: 'source.ros-aml',
+                                        path: './ros-aml-grammar.json',
+                                    },
+                                ],
+                            },
+                        },
+                        filesOrContents: extensionFilesOrContents,
                     },
-                    filesOrContents: extensionFilesOrContents,
-                }],                
+                ],
                 userConfiguration: {
                     json: JSON.stringify({
                         'workbench.colorTheme': 'Default Dark Modern',
-                        'editor.semanticHighlighting.enabled': true
-                    })
-                }
-            }
+                        'editor.semanticHighlighting.enabled': true,
+                    }),
+                },
+            },
         },
-        languageClientConfig: configureWorker()
+        languageClientConfig: configureWorker(),
     };
 };
 

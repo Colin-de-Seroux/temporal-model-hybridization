@@ -1,12 +1,12 @@
-import { afterEach, beforeAll, describe, expect, test } from "vitest";
-import { EmptyFileSystem, type LangiumDocument } from "langium";
-import { expandToString as s } from "langium/generate";
-import { clearDocuments, parseHelper } from "langium/test";
-import { createRosAmlServices } from "../../src/language/ros-aml-module.js";
-import { Model, isModel } from "../../src/language/generated/ast.js";
+import { afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { EmptyFileSystem, type LangiumDocument } from 'langium';
+import { expandToString as s } from 'langium/generate';
+import { clearDocuments, parseHelper } from 'langium/test';
+import { createRosAmlServices } from '../../src/language/ros-aml-module.js';
+import { Model, isModel } from '../../src/language/generated/ast.js';
 
 let services: ReturnType<typeof createRosAmlServices>;
-let parse:    ReturnType<typeof parseHelper<Model>>;
+let parse: ReturnType<typeof parseHelper<Model>>;
 let document: LangiumDocument<Model> | undefined;
 
 beforeAll(async () => {
@@ -18,11 +18,10 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-    document && clearDocuments(services.shared, [ document ]);
+    document && clearDocuments(services.shared, [document]);
 });
 
 describe('Linking tests', () => {
-
     test('linking of greetings', async () => {
         document = await parse(`
             person Langium
@@ -34,8 +33,10 @@ describe('Linking tests', () => {
             //  'checkDocumentValid()' to sort out (critical) typos first,
             // and then evaluate the cross references we're interested in by checking
             //  the referenced AST element as well as for a potential error message;
-            checkDocumentValid(document)
-                || document.parseResult.value.greetings.map(g => g.person.ref?.name || g.person.error?.message).join('\n')
+            checkDocumentValid(document) ||
+                document.parseResult.value.greetings
+                    .map((g) => g.person.ref?.name || g.person.error?.message)
+                    .join('\n')
         ).toBe(s`
             Langium
         `);
@@ -43,11 +44,16 @@ describe('Linking tests', () => {
 });
 
 function checkDocumentValid(document: LangiumDocument): string | undefined {
-    return document.parseResult.parserErrors.length && s`
+    return (
+        (document.parseResult.parserErrors.length &&
+            s`
         Parser errors:
-          ${document.parseResult.parserErrors.map(e => e.message).join('\n  ')}
-    `
-        || document.parseResult.value === undefined && `ParseResult is 'undefined'.`
-        || !isModel(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`
-        || undefined;
+          ${document.parseResult.parserErrors.map((e) => e.message).join('\n  ')}
+    `) ||
+        (document.parseResult.value === undefined &&
+            `ParseResult is 'undefined'.`) ||
+        (!isModel(document.parseResult.value) &&
+            `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`) ||
+        undefined
+    );
 }

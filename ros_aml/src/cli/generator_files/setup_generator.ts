@@ -1,4 +1,4 @@
-import { Model } from "../../language/generated/ast.js";
+import { Model } from '../../language/generated/ast.js';
 
 export function generateSetupPy(pkgName: string, model: Model): string {
     return `
@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            ${model.nodes.map(n => `'${n.name.toLowerCase()} = ${pkgName}.${n.name}:main'`).join(',\n            ')}
+            ${model.nodes.map((n) => `'${n.name.toLowerCase()} = ${pkgName}.${n.name}:main'`).join(',\n            ')}
         ],
     },
 )

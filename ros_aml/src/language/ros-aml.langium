@@ -6,7 +6,7 @@ entry Model:
 Node:
     'node' name=ID 
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    (publishers+=Publisher |subscribers+=Subscriber | services+=Service | actions+=Action)*
+    (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action)*
     ;
 
 Publisher:

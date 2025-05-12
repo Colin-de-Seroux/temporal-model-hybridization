@@ -1,12 +1,12 @@
-import { beforeAll, describe, expect, test } from "vitest";
-import { EmptyFileSystem, type LangiumDocument } from "langium";
-import { expandToString as s } from "langium/generate";
-import { parseHelper } from "langium/test";
-import { createRosAmlServices } from "../../src/language/ros-aml-module.js";
-import { Model, isModel } from "../../src/language/generated/ast.js";
+import { beforeAll, describe, expect, test } from 'vitest';
+import { EmptyFileSystem, type LangiumDocument } from 'langium';
+import { expandToString as s } from 'langium/generate';
+import { parseHelper } from 'langium/test';
+import { createRosAmlServices } from '../../src/language/ros-aml-module.js';
+import { Model, isModel } from '../../src/language/generated/ast.js';
 
 let services: ReturnType<typeof createRosAmlServices>;
-let parse:    ReturnType<typeof parseHelper<Model>>;
+let parse: ReturnType<typeof parseHelper<Model>>;
 let document: LangiumDocument<Model> | undefined;
 
 beforeAll(async () => {
@@ -18,7 +18,6 @@ beforeAll(async () => {
 });
 
 describe('Parsing tests', () => {
-
     test('parse simple model', async () => {
         document = await parse(`
             person Langium
@@ -34,11 +33,12 @@ describe('Parsing tests', () => {
             //  of the AST part we are interested in and that is to be compared to our expectation;
             // prior to the tagged template expression we check for validity of the parsed document object
             //  by means of the reusable function 'checkDocumentValid()' to sort out (critical) typos first;
-            checkDocumentValid(document) || s`
+            checkDocumentValid(document) ||
+                s`
                 Persons:
-                  ${document.parseResult.value?.persons?.map(p => p.name)?.join('\n  ')}
+                  ${document.parseResult.value?.persons?.map((p) => p.name)?.join('\n  ')}
                 Greetings to:
-                  ${document.parseResult.value?.greetings?.map(g => g.person.$refText)?.join('\n  ')}
+                  ${document.parseResult.value?.greetings?.map((g) => g.person.$refText)?.join('\n  ')}
             `
         ).toBe(s`
             Persons:
@@ -50,11 +50,16 @@ describe('Parsing tests', () => {
 });
 
 function checkDocumentValid(document: LangiumDocument): string | undefined {
-    return document.parseResult.parserErrors.length && s`
+    return (
+        (document.parseResult.parserErrors.length &&
+            s`
         Parser errors:
-          ${document.parseResult.parserErrors.map(e => e.message).join('\n  ')}
-    `
-        || document.parseResult.value === undefined && `ParseResult is 'undefined'.`
-        || !isModel(document.parseResult.value) && `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`
-        || undefined;
+          ${document.parseResult.parserErrors.map((e) => e.message).join('\n  ')}
+    `) ||
+        (document.parseResult.value === undefined &&
+            `ParseResult is 'undefined'.`) ||
+        (!isModel(document.parseResult.value) &&
+            `Root AST object is a ${document.parseResult.value.$type}, expected a '${Model}'.`) ||
+        undefined
+    );
 }

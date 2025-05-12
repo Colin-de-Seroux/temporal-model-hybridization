@@ -13,8 +13,8 @@ export default defineConfig({
         //     exclude: ['**/generated'],
         // },
         deps: {
-            interopDefault: true
+            interopDefault: true,
         },
-        include: ['**/*.test.ts']
-    }
+        include: ['**/*.test.ts'],
+    },
 });

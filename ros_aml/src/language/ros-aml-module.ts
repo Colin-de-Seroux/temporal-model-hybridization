@@ -1,32 +1,48 @@
 import { type Module, inject } from 'langium';
-import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
-import { RosAmlGeneratedModule, RosAmlGeneratedSharedModule } from './generated/module.js';
-import { RosAmlValidator, registerValidationChecks } from './ros-aml-validator.js';
+import {
+    createDefaultModule,
+    createDefaultSharedModule,
+    type DefaultSharedModuleContext,
+    type LangiumServices,
+    type LangiumSharedServices,
+    type PartialLangiumServices,
+} from 'langium/lsp';
+import {
+    RosAmlGeneratedModule,
+    RosAmlGeneratedSharedModule,
+} from './generated/module.js';
+import {
+    RosAmlValidator,
+    registerValidationChecks,
+} from './ros-aml-validator.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type RosAmlAddedServices = {
     validation: {
-        RosAmlValidator: RosAmlValidator
-    }
-}
+        RosAmlValidator: RosAmlValidator;
+    };
+};
 
 /**
  * Union of Langium default services and your custom services - use this as constructor parameter
  * of custom service classes.
  */
-export type RosAmlServices = LangiumServices & RosAmlAddedServices
+export type RosAmlServices = LangiumServices & RosAmlAddedServices;
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
  * declared custom services. The Langium defaults can be partially specified to override only
  * selected services, while the custom services must be fully specified.
  */
-export const RosAmlModule: Module<RosAmlServices, PartialLangiumServices & RosAmlAddedServices> = {
+export const RosAmlModule: Module<
+    RosAmlServices,
+    PartialLangiumServices & RosAmlAddedServices
+> = {
     validation: {
-        RosAmlValidator: () => new RosAmlValidator()
-    }
+        RosAmlValidator: () => new RosAmlValidator(),
+    },
 };
 
 /**
@@ -45,8 +61,8 @@ export const RosAmlModule: Module<RosAmlServices, PartialLangiumServices & RosAm
  * @returns An object wrapping the shared services and the language-specific services
  */
 export function createRosAmlServices(context: DefaultSharedModuleContext): {
-    shared: LangiumSharedServices,
-    RosAml: RosAmlServices
+    shared: LangiumSharedServices;
+    RosAml: RosAmlServices;
 } {
     const shared = inject(
         createDefaultSharedModule(context),

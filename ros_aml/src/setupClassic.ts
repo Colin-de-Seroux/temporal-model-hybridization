@@ -1,6 +1,9 @@
-import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
+import {
+    MonacoEditorLanguageClientWrapper,
+    UserConfig,
+} from 'monaco-editor-wrapper';
 import { configureWorker, defineUserServices } from './setupCommon.js';
-import monarchSyntax from "./syntaxes/ros-aml.monarch.js";
+import monarchSyntax from './syntaxes/ros-aml.monarch.js';
 
 export const setupConfigClassic = (): UserConfig => {
     return {
@@ -15,11 +18,11 @@ export const setupConfigClassic = (): UserConfig => {
                 languageDef: monarchSyntax,
                 editorOptions: {
                     'semanticHighlighting.enabled': true,
-                    theme: 'vs-dark'
-                }
-            }
+                    theme: 'vs-dark',
+                },
+            },
         },
-        languageClientConfig: configureWorker()
+        languageClientConfig: configureWorker(),
     };
 };
 

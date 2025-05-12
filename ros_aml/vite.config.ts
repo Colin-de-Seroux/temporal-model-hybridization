@@ -10,24 +10,28 @@ export default defineConfig(() => {
             rollupOptions: {
                 input: {
                     index: path.resolve(__dirname, 'index.html'),
-                    monacoClassic: path.resolve(__dirname, 'static/monacoClassic.html'),
-                    monacoExtended: path.resolve(__dirname, 'static/monacoExtended.html'),
-                }
-            }
+                    monacoClassic: path.resolve(
+                        __dirname,
+                        'static/monacoClassic.html'
+                    ),
+                    monacoExtended: path.resolve(
+                        __dirname,
+                        'static/monacoExtended.html'
+                    ),
+                },
+            },
         },
         resolve: {
-            dedupe: ['vscode']
+            dedupe: ['vscode'],
         },
         optimizeDeps: {
             esbuildOptions: {
-                plugins: [
-                    importMetaUrlPlugin
-                ]
-            }
+                plugins: [importMetaUrlPlugin],
+            },
         },
         server: {
-            port: 5173
-        }
+            port: 5173,
+        },
     };
     return config;
 });
