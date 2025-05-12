@@ -28,7 +28,6 @@ export function generateRosScript(model: Model, filePath: string, destination: s
         fs.writeFileSync(nodeFilePath, toString(fileNode));
     });
     fs.writeFileSync(path.join(srcPath, 'timer_execution.py'), generateTimerExecutionPy());
-
     fs.writeFileSync(path.join(rootPath, 'setup.py'), generateSetupPy(pkgName, model));
     fs.writeFileSync(path.join(rootPath, 'setup.cfg'), generateSetupCfg(pkgName));
     fs.writeFileSync(path.join(rootPath, 'package.xml'), generatePackageXml(pkgName));
@@ -47,6 +46,7 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
 
     const constructorBody = new CompositeGeneratorNode();
     const methods = new CompositeGeneratorNode();
+    const types = new Set<string>();
 
     nodeBlock.append(`import rclpy`);
     nodeBlock.appendNewLine();
@@ -54,7 +54,7 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.executors import ExternalShutdownException`);
     nodeBlock.appendNewLine();
-    nodeBlock.append(`from std_msgs.msg import *`);
+    nodeBlock.append(`from std_msgs.msg import String, Int32, Float32, Bool, Header`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`from ${pkgName}.timer_execution import measure_execution_time`);
     nodeBlock.appendNewLine();
@@ -71,12 +71,12 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
 
 
     node.publishers?.forEach(pub => {
-        constructorBody.append(compilePublisher(pub));
+        constructorBody.append(compilePublisher(pub,types));
         constructorBody.appendNewLine();
     });
 
     node.subscribers?.forEach(sub => {
-        const [initCode, methodCode] = compileSubscriber(sub);
+        const [initCode, methodCode] = compileSubscriber(sub,types);
         constructorBody.append(initCode);
         constructorBody.appendNewLine();
         methods.append(methodCode);
@@ -84,7 +84,7 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
     });
 
     node.services?.forEach(service => {
-    const [initCode, methodCode] = compileService(service);
+    const [initCode, methodCode] = compileService(service,types);
     constructorBody.append(initCode);
     constructorBody.appendNewLine();
     methods.append(methodCode);
@@ -92,7 +92,7 @@ function compileNode(pkgName:string ,node: Node): CompositeGeneratorNode {
     });
 
     node.actions?.forEach(action => {
-        const [initCode, methodCode] = compileAction(action);
+        const [initCode, methodCode] = compileAction(action,types);
         constructorBody.append(initCode);
         constructorBody.appendNewLine();
         methods.append(methodCode);
@@ -119,17 +119,19 @@ def main(args=None):
 
 }   
 
-function compilePublisher(pub: Publisher): CompositeGeneratorNode {
+function compilePublisher(pub: Publisher,types: Set<string>): CompositeGeneratorNode {
     const node = new CompositeGeneratorNode();
     const type = resolveMessageType(pub.msgType, pub.msg);
+    types.add(type);
     node.append(`        self.publisher_${pub.topicName} = self.create_publisher(${type}, '${pub.topicName}', 10)`);
     return node;
 }
 
-function compileSubscriber(sub: Subscriber): [CompositeGeneratorNode, CompositeGeneratorNode] {
+function compileSubscriber(sub: Subscriber,types: Set<string>): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
     const type = resolveMessageType(sub.msgType, sub.msg);
+    types.add(type);
 
 
     init.append(`        self.subscription_${sub.topicName} = self.create_subscription(`);
@@ -145,10 +147,11 @@ function compileSubscriber(sub: Subscriber): [CompositeGeneratorNode, CompositeG
 }
 
 
-function compileService(service: Service): [CompositeGeneratorNode, CompositeGeneratorNode] {
+function compileService(service: Service,types: Set<string>): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
     const type = service.srvType?.split('.').at(-1) ?? 'DefaultServiceType';
+    types.add(type);
 
     init.append(`        self.service_${service.serviceName} = self.create_service(`);
     init.append(`${type}, '${service.serviceName}', self.handle_${service.serviceName})`);
@@ -165,11 +168,11 @@ function compileService(service: Service): [CompositeGeneratorNode, CompositeGen
 }
 
 
-function compileAction(action: Action): [CompositeGeneratorNode, CompositeGeneratorNode] {
+function compileAction(action: Action,types: Set<string>): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
     const type = action.actionType?.split('.').at(-1) ?? 'DefaultActionType';
-
+    types.add(type);
     init.append(`        # Action server for ${action.actionName}`);
     init.appendNewLine();
     init.append(`        self.action_server_${action.actionName} = rclpy.action.ActionServer(`);
