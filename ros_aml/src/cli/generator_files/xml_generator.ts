@@ -5,6 +5,8 @@ export function generatePackageXml(pkgName: string): string {
   <version>0.0.1</version>
   <description>Auto-generated ROS 2 package</description>
   <maintainer email="noreply@example.com">Auto Generator</maintainer>
+  <!-- Or other, it's just mandatory -->
+  <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
