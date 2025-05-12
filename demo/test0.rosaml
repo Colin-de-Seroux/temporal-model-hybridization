@@ -1,0 +1,5 @@
+logger info
+
+node Test
+expectedExecTime 0.15 ms
+log info "Test was launch"

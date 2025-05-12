@@ -74,7 +74,7 @@ export function generateRosScript(
     );
     fs.writeFileSync(
         path.join(rootPath, 'entrypoint.sh'),
-        generateEntrypoint(pkgName)
+        generateEntrypoint(pkgName, model.logger.level)
     );
     fs.mkdirSync(path.join(rootPath, 'launch'), { recursive: true });
     fs.writeFileSync(
@@ -107,6 +107,7 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     );
     nodeBlock.appendNewLine();
     nodeBlock.appendNewLine();
+    nodeBlock.appendNewLine();
 
     nodeBlock.append(`class ${node.name}Node(Node):`);
     nodeBlock.appendNewLine();
@@ -114,6 +115,11 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`        super().__init__('${node.name}')`);
     nodeBlock.appendNewLine();
+
+    node.logs?.forEach((log) => {
+        constructorBody.append(compileLogger(log.level, log.msg));
+        constructorBody.appendNewLine();
+    });
 
     node.publishers?.forEach((pub) => {
         constructorBody.append(compilePublisher(pub, types));
@@ -151,7 +157,9 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.append(`
 def main(args=None):
     rclpy.init(args=args)
+
     node = ${node.name}Node()
+
     try:
         rclpy.spin(node)
     except (KeyboardInterrupt, ExternalShutdownException):
@@ -161,6 +169,12 @@ def main(args=None):
         rclpy.try_shutdown()
 `);
     return nodeBlock;
+}
+
+function compileLogger(level: string, msg: string): CompositeGeneratorNode {
+    const node = new CompositeGeneratorNode();
+    node.append(`        self.get_logger().${level}('${msg}')`);
+    return node;
 }
 
 function compilePublisher(

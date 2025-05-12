@@ -1,13 +1,17 @@
 grammar RosAml
 
 entry Model:
+    logger=LoggerLevel
+
     nodes+=Node*;
+
+LoggerLevel:
+    'logger' level=LEVEL;
 
 Node:
     'node' name=ID 
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action)*
-    ;
+    (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action | logs+=Logger)*;
 
 Publisher:
     'publish' topicName=ID ('type' msgType=STRING)? 'message' msg=STRING;
@@ -24,7 +28,10 @@ Action:
     'result' result=STRING
     'feedback' feedback=STRING;
 
+Logger:
+    'log' level=LEVEL msg=STRING;
 
+terminal LEVEL: "debug" | "info" | "warning" | "error";
 terminal ID: /[_a-zA-Z][\w_]*/;
 terminal QualifiedName: ID ('.' ID)*;
 terminal INT returns number: /[0-9]+/;

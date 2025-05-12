@@ -1,4 +1,7 @@
-export function generateEntrypoint(pkgName: string): string {
+export function generateEntrypoint(
+    pkgName: string,
+    loggerLevel: string
+): string {
     return `
 #!/bin/bash
 
@@ -20,6 +23,6 @@ trap save_logs EXIT
 echo "Starting ROS2 node..."
 source /opt/ros/jazzy/setup.sh
 source /ros2_ws/install/setup.sh
-ros2 run ${pkgName} ${pkgName} >/dev/null 2>&1
+ros2 run ${pkgName} ${pkgName} --ros-args --log-level ${loggerLevel.toUpperCase()} >/dev/null 2>&1
 `.trim();
 }
