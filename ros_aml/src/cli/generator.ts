@@ -9,7 +9,7 @@ import {
 import { CompositeGeneratorNode, toString } from 'langium/generate';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { extractDestinationAndName } from './cli-util.js';
+import { camelCaseToSnakeCase, extractDestinationAndName } from './cli-util.js';
 import {
     generateDockerfile,
     generateDockerComposePart,
@@ -30,7 +30,7 @@ export function generateRosScript(
     destination: string | undefined
 ): string {
     const data = extractDestinationAndName(filePath, destination);
-    const pkgName = data.name.toLowerCase();
+    const pkgName = camelCaseToSnakeCase(data.name);
     const rootPath = path.join(data.destination, pkgName);
 
     const srcPath = path.join(rootPath, pkgName);
@@ -41,7 +41,10 @@ export function generateRosScript(
 
     model.nodes.forEach((node) => {
         const fileNode = compileNode(pkgName, node);
-        const nodeFilePath = path.join(srcPath, `${node.name}.py`);
+        const nodeFilePath = path.join(
+            srcPath,
+            `${camelCaseToSnakeCase(node.name)}.py`
+        );
         fs.writeFileSync(nodeFilePath, toString(fileNode));
     });
     fs.writeFileSync(

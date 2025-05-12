@@ -33,29 +33,29 @@ CMD . /opt/ros/jazzy/setup.sh && . /ros2_ws/install/setup.sh && ros2 run ${pkgNa
 export function generateDockerComposePart(pkgName: string): string {
     return `
 services:
-    ${pkgName}:
-        image: ${pkgName}
-        build:
-            context: ./ros2/src/${pkgName}
-            dockerfile: Dockerfile
-        container_name: ${pkgName}
-        environment:
-            - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-            - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-            - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-            - ROS_HOME=/ros2_ws/.ros
-        volumes:
-            - ./ros2/src/${pkgName}/Logs:/ros_logs_backup
-        tmpfs:
-            - /ros2_ws/.ros/log # To RAM
-        deploy:
-        resources:
-            limits:
-            cpus: "1"
-            memory: 200M
-            reservations:
-            cpus: "1"
-            memory: 200M
-        command: /entrypoint.sh
+  ${pkgName}:
+    image: ${pkgName}
+    build:
+      context: ./ros2/src/${pkgName}
+      dockerfile: Dockerfile
+    container_name: ${pkgName}
+    environment:
+      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
+      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
+      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+      - ROS_HOME=/ros2_ws/.ros
+    volumes:
+      - ./ros2/src/${pkgName}/Logs:/ros_logs_backup
+    tmpfs:
+      - /ros2_ws/.ros/log # To RAM
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 200M
+        reservations:
+          cpus: "1"
+          memory: 200M
+    command: /entrypoint.sh
 `.trim();
 }

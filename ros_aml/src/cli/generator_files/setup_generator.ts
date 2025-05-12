@@ -1,4 +1,5 @@
 import { Model } from '../../language/generated/ast.js';
+import { camelCaseToSnakeCase } from '../cli-util.js';
 
 export function generateSetupPy(pkgName: string, model: Model): string {
     return `
@@ -13,7 +14,7 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', 
             ['resource/' + package_name]),
-        ('share/'+package_name, ['package.xml']),
+        ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,7 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            ${model.nodes.map((n) => `'${n.name.toLowerCase()} = ${pkgName}.${n.name}:main'`).join(',\n            ')}
+            ${model.nodes.map((n) => `'${camelCaseToSnakeCase(n.name)} = ${pkgName}.${camelCaseToSnakeCase(n.name)}:main'`).join(',\n            ')}
         ],
     },
 )
