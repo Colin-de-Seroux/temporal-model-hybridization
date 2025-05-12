@@ -25,8 +25,8 @@ RUN . /opt/ros/jazzy/setup.sh && colcon build --merge-install
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Source the workspace, install dependencies and run the node
-CMD . /opt/ros/jazzy/setup.sh && . /ros2_ws/install/setup.sh && ros2 run ${pkgName} ${pkgName}
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 `.trim();
 }
 
@@ -56,6 +56,5 @@ services:
         reservations:
           cpus: "1"
           memory: 200M
-    command: /entrypoint.sh
 `.trim();
 }

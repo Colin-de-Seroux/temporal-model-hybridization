@@ -77,10 +77,17 @@ export function generateRosScript(
         generateEntrypoint(pkgName, model.logger.level)
     );
     fs.mkdirSync(path.join(rootPath, 'launch'), { recursive: true });
-    fs.writeFileSync(
-        path.join(rootPath, 'launch', `${pkgName}_launch.py`),
-        generateLaunchFile(pkgName, pkgName)
-    );
+    model.nodes.forEach((node) => {
+        fs.writeFileSync(
+            path.join(rootPath, 'launch', `${pkgName}_launch.py`),
+            generateLaunchFile(
+                pkgName,
+                camelCaseToSnakeCase(node.name),
+                `${node.name}Node`,
+                model.logger.level
+            )
+        );
+    });
 
     return rootPath;
 }

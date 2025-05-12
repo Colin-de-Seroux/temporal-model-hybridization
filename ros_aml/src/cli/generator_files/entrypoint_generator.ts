@@ -23,6 +23,8 @@ trap save_logs EXIT
 echo "Starting ROS2 node..."
 source /opt/ros/jazzy/setup.sh
 source /ros2_ws/install/setup.sh
-ros2 run ${pkgName} ${pkgName} --ros-args --log-level ${loggerLevel.toUpperCase()} >/dev/null 2>&1
+
+echo "Running entrypoint script..."
+ros2 launch ${pkgName} ${pkgName}_launch.py
 `.trim();
 }
