@@ -9,8 +9,7 @@ LoggerLevel:
     'logger' level=LEVEL;
 
 Node:
-    'node' name=ID 
-    'expectedExecTime' expectedExecTime=DOUBLE 'ms'
+    'node' name=ID expectedExecTime=DOUBLE
     (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action | logs+=Logger)*;
 
 Publisher:
