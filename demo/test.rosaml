@@ -1,3 +1,5 @@
+logger info
+
 node Talker
 expectedExecTime 0.15 ms
 publish chatter message "Hello from talker"
