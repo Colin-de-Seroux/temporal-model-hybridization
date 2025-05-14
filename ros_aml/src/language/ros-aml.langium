@@ -5,39 +5,54 @@ entry Model:
 
     nodes+=Node*;
 
+
 LoggerLevel:
     'logger' level=LEVEL;
 
 Node:
-    'node' name=ID expectedExecTime=DOUBLE
-    (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action | logs+=Logger)*;
+    'node' name=STRING expectedExecTime=DOUBLE
+    steps=Steps?
+    (callbackFunctions+=CallbackFunction | services+=Service | actions+=Action)*;
 
-Publisher:
-    'publish' topicName=ID ('type' msgType=STRING)? 'message' msg=STRING;
+Steps:
+    'steps' '{' steps+=Step* '}';
 
-Subscriber:
-    'subscribe' topicName=ID ('type' msgType=STRING)? msg=STRING;
-
-Service:
-    'service' serviceName=ID ('type' srvType=STRING)?;
-
-Action:
-    'action' actionName=ID ('type' actionType=STRING)? 
-    'goal' goal=STRING
-    'result' result=STRING
-    'feedback' feedback=STRING;
+Step:
+    Logger | Publisher | Subscriber | Timer | Service | Action | Publish;
 
 Logger:
     'log' level=LEVEL msg=STRING;
 
-terminal LEVEL: "debug" | "info" | "warning" | "error";
-terminal ID: /[_a-zA-Z][\w_]*/;
-terminal QualifiedName: ID ('.' ID)*;
-terminal INT returns number: /[0-9]+/;
-terminal FLOAT: /[0-9]+\.[0-9]+/;
+Publisher:
+    'publisher' name=STRING msgType=MSGTYPE topic=STRING qos=INT;
+
+Subscriber:
+    'subscriber' name=STRING msgType=MSGTYPE topic=STRING callbackFunction=STRING qos=INT;
+
+Timer:
+    'timer' period=DOUBLE callbackFunction=STRING;
+
+CallbackFunction:
+    'callbackFunction' name=STRING
+    steps=Steps?;
+
+Service:
+    'service' name=STRING estimatedExecutionTime=DOUBLE
+    (logs+=Logger)*;
+
+Action:
+    'action' name=STRING estimatedExecutionTime=DOUBLE
+    (logs+=Logger)*;
+
+Publish:
+    'publish' publisherName=STRING msg=STRING;
+
+
+terminal LEVEL: 'debug' | 'info' | 'warning' | 'error';
+terminal MSGTYPE: 'String' | 'Int32' | 'Float32' | 'Bool';
 terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
+terminal INT returns number: /[0-9]+/;
 terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
-terminal BOOL: 'true' | 'false';
 
 hidden terminal WS: /\s+/;
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;

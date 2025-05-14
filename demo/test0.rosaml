@@ -1,4 +1,6 @@
 logger info
 
-node Test 10.0
-log info 'Test was launch'
+node 'Test' 10.0
+steps {
+    log info 'Test was launch'
+}
