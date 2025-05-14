@@ -49,10 +49,7 @@ TemporalConstraint:
     DriftDetection;
 
 PrecedenceConstraint:
-    'precedence' source=CallbackRef '->' target=CallbackRef 'within' maxDelay=DOUBLE 'ms';
-
-CallbackRef:
-    Callback | Node;
+    'precedence' source=ID '->' target=ID 'within' maxDelay=DOUBLE 'ms';
 
 InvariantConstraint:
     'invariant' invariantType=InvariantType;
@@ -62,26 +59,24 @@ InvariantType:
 
 
 MinInterEventTime:
-    'minInterEventTime' from=CommEntity 'to' to=CommEntity '>=' delay=DOUBLE 'ms';
+    'minInterEventTime' from=ID 'to' to=ID '>=' delay=DOUBLE 'ms';
 
 MaxInterEventTime:
-    'maxInterEventTime' from=CommEntity 'to' to=CommEntity '<=' delay=DOUBLE 'ms';
+    'maxInterEventTime' from=ID 'to' to=ID '<=' delay=DOUBLE 'ms';
 
 MaxJitter:
-    'jitter' on=CallbackRef '<=' value=DOUBLE 'ms';
+    'jitter' on=ID '<=' value=DOUBLE 'ms';
 
 DeadlineConstraint:
-    'deadline' on=CallbackRef '<=' deadline=DOUBLE 'ms';
+    'deadline' on=ID '<=' deadline=DOUBLE 'ms';
 
 DriftDetection:
     'monitorDrift'
-        'on' target=CallbackRef
+        'on' target=ID
         'for' metric=DriftMetric
         'threshold' threshold=DOUBLE 'ms'
         ('logLevel' level=LEVEL)?;
     
-CommEntity:
-    Publisher | Subscriber | Callback;
 
 
 terminal DriftMetric: 'execTime' | 'jitter' | 'activationPeriod' | 'interEventTime';
