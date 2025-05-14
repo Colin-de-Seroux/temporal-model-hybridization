@@ -11,7 +11,7 @@ LoggerLevel:
 
 Node:
     'node' name=STRING expectedExecTime=DOUBLE
-    steps=Steps?
+    init=Steps?
     (callbackFunctions+=CallbackFunction | services+=Service | actions+=Action)*;
 
 Steps:
@@ -30,10 +30,10 @@ Subscriber:
     'subscriber' name=STRING msgType=MSGTYPE topic=STRING callbackFunction=STRING qos=INT;
 
 Timer:
-    'timer' period=DOUBLE callbackFunction=STRING;
+    'timer' name=STRING period=DOUBLE callbackFunction=STRING;
 
 CallbackFunction:
-    'callbackFunction' name=STRING
+    'callbackFunction' name=STRING type=CFTYPE
     steps=Steps?;
 
 Service:
@@ -50,6 +50,7 @@ Publish:
 
 terminal LEVEL: 'debug' | 'info' | 'warning' | 'error';
 terminal MSGTYPE: 'String' | 'Int32' | 'Float32' | 'Bool';
+terminal CFTYPE: 'Publisher' | 'Subscriber';
 terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
 terminal INT returns number: /[0-9]+/;
 terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;

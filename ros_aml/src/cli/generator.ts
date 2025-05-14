@@ -1,8 +1,12 @@
 import {
-    Action,
-    Publisher,
-    Service,
-    Subscriber,
+    // Action,
+    // CallbackFunction,
+    // Logger,
+    // Publish,
+    // Publisher,
+    // Service,
+    // Subscriber,
+    // Timer,
     type Model,
     type Node,
 } from '../language/generated/ast.js';
@@ -22,7 +26,7 @@ import {
 } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
-import { resolveMessageType } from './utils/utils.js';
+// import { resolveMessageType } from './utils/utils.js';
 
 export function generateRosScript(
     model: Model,
@@ -90,7 +94,6 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 
     const constructorBody = new CompositeGeneratorNode();
     const methods = new CompositeGeneratorNode();
-    const types = new Set<string>();
 
     nodeBlock.append(`import rclpy`);
     nodeBlock.appendNewLine();
@@ -116,41 +119,54 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.append(`        super().__init__('${node.name}')`);
     nodeBlock.appendNewLine();
 
-    node.logs?.forEach((log) => {
-        constructorBody.append(compileLogger(log.level, log.msg));
-        constructorBody.appendNewLine();
-    });
-
-    node.publishers?.forEach((pub) => {
-        constructorBody.append(compilePublisher(pub, types));
-        constructorBody.appendNewLine();
-    });
-
-    node.subscribers?.forEach((sub) => {
-        const [initCode, methodCode] = compileSubscriber(sub, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
-
-    node.services?.forEach((service) => {
-        const [initCode, methodCode] = compileService(service, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
-
-    node.actions?.forEach((action) => {
-        const [initCode, methodCode] = compileAction(action, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
+    node.init?.steps.forEach((step) => {
+        if (step.$type === 'Logger') {
+            constructorBody.append(
+                `        self.get_logger().${step.level}('${step.msg}')`
+            );
+            constructorBody.appendNewLine();
+        } else if (step.$type === 'Publisher') {
+            constructorBody.append(
+                `        self.${step.name} = self.create_publisher(${step.msgType}, '${step.topic}', ${step.qos})`
+            );
+            constructorBody.appendNewLine();
+        } else if (step.$type === 'Subscriber') {
+            constructorBody.append(
+                `        self.${step.name} = self.create_subscription(${step.msgType}, '${step.topic}', self.${step.callbackFunction}, ${step.qos})`
+            );
+            constructorBody.appendNewLine();
+        } else if (step.$type === 'Timer') {
+            constructorBody.append(
+                `        self.${step.name} = self.create_timer(${step.period}, self.${step.callbackFunction})`
+            );
+            constructorBody.appendNewLine();
+        }
     });
 
     nodeBlock.append(constructorBody);
+
+    node.callbackFunctions?.forEach((callback) => {
+        methods.appendNewLine();
+        methods.append(
+            `    def ${callback.name}(self${callback.type === 'Subscriber' ? ', msg' : ''}):`
+        );
+        methods.appendNewLine();
+
+        callback.steps?.steps.forEach((step) => {
+            if (step.$type === 'Logger') {
+                methods.append(
+                    `        self.get_logger().${step.level}(${step.msg})`
+                );
+                methods.appendNewLine();
+            } else if (step.$type === 'Publish') {
+                methods.append(
+                    `        self.${step.publisherName}.publish(${step.msg})`
+                );
+                methods.appendNewLine();
+            }
+        });
+    });
+
     nodeBlock.append(methods);
 
     nodeBlock.appendNewLine();
@@ -171,114 +187,114 @@ def main(args=None):
     return nodeBlock;
 }
 
-function compileLogger(level: string, msg: string): CompositeGeneratorNode {
-    const node = new CompositeGeneratorNode();
-    node.append(`        self.get_logger().${level}('${msg}')`);
-    return node;
-}
+// function compileLogger(level: string, msg: string): CompositeGeneratorNode {
+//     const node = new CompositeGeneratorNode();
+//     node.append(`        self.get_logger().${level}('${msg}')`);
+//     return node;
+// }
 
-function compilePublisher(
-    pub: Publisher,
-    types: Set<string>
-): CompositeGeneratorNode {
-    const node = new CompositeGeneratorNode();
-    const type = resolveMessageType(pub.msgType, pub.msg);
-    types.add(type);
-    node.append(
-        `        self.publisher_${pub.topicName} = self.create_publisher(${type}, '${pub.topicName}', 10)`
-    );
-    return node;
-}
+// function compilePublisher(
+//     pub: Publisher,
+//     types: Set<string>
+// ): CompositeGeneratorNode {
+//     const node = new CompositeGeneratorNode();
+//     const type = resolveMessageType(pub.msgType, pub.msg);
+//     types.add(type);
+//     node.append(
+//         `        self.publisher_${pub.topicName} = self.create_publisher(${type}, '${pub.topicName}', 10)`
+//     );
+//     return node;
+// }
 
-function compileSubscriber(
-    sub: Subscriber,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = resolveMessageType(sub.msgType, sub.msg);
-    types.add(type);
+// function compileSubscriber(
+//     sub: Subscriber,
+//     types: Set<string>
+// ): [CompositeGeneratorNode, CompositeGeneratorNode] {
+//     const init = new CompositeGeneratorNode();
+//     const method = new CompositeGeneratorNode();
+//     const type = resolveMessageType(sub.msgType, sub.msg);
+//     types.add(type);
 
-    init.append(
-        `        self.subscription_${sub.topicName} = self.create_subscription(`
-    );
-    init.append(
-        `${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`
-    );
-    init.appendNewLine();
+//     init.append(
+//         `        self.subscription_${sub.topicName} = self.create_subscription(`
+//     );
+//     init.append(
+//         `${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`
+//     );
+//     init.appendNewLine();
 
-    method.append(`    def listener_callback_${sub.topicName}(self, msg):`);
-    method.appendNewLine();
-    method.append(`        self.get_logger().info('${sub.msg}')`);
-    method.appendNewLine();
+//     method.append(`    def listener_callback_${sub.topicName}(self, msg):`);
+//     method.appendNewLine();
+//     method.append(`        self.get_logger().info('${sub.msg}')`);
+//     method.appendNewLine();
 
-    return [init, method];
-}
+//     return [init, method];
+// }
 
-function compileService(
-    service: Service,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = service.srvType?.split('.').at(-1) ?? 'DefaultServiceType';
-    types.add(type);
+// function compileService(
+//     service: Service,
+//     types: Set<string>
+// ): [CompositeGeneratorNode, CompositeGeneratorNode] {
+//     const init = new CompositeGeneratorNode();
+//     const method = new CompositeGeneratorNode();
+//     const type = service.srvType?.split('.').at(-1) ?? 'DefaultServiceType';
+//     types.add(type);
 
-    init.append(
-        `        self.service_${service.serviceName} = self.create_service(`
-    );
-    init.append(
-        `${type}, '${service.serviceName}', self.handle_${service.serviceName})`
-    );
-    init.appendNewLine();
+//     init.append(
+//         `        self.service_${service.serviceName} = self.create_service(`
+//     );
+//     init.append(
+//         `${type}, '${service.serviceName}', self.handle_${service.serviceName})`
+//     );
+//     init.appendNewLine();
 
-    method.append(
-        `    def handle_${service.serviceName}(self, request, response):`
-    );
-    method.appendNewLine();
-    method.append(`        # TODO: Implement service logic`);
-    method.appendNewLine();
-    method.append(`        return response`);
-    method.appendNewLine();
+//     method.append(
+//         `    def handle_${service.serviceName}(self, request, response):`
+//     );
+//     method.appendNewLine();
+//     method.append(`        # TODO: Implement service logic`);
+//     method.appendNewLine();
+//     method.append(`        return response`);
+//     method.appendNewLine();
 
-    return [init, method];
-}
+//     return [init, method];
+// }
 
-function compileAction(
-    action: Action,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = action.actionType?.split('.').at(-1) ?? 'DefaultActionType';
-    types.add(type);
-    init.append(`        # Action server for ${action.actionName}`);
-    init.appendNewLine();
-    init.append(
-        `        self.action_server_${action.actionName} = rclpy.action.ActionServer(`
-    );
-    init.appendNewLine();
-    init.append(
-        `            self, ${type}, '${action.actionName}', self.execute_${action.actionName})`
-    );
-    init.appendNewLine();
+// function compileAction(
+//     action: Action,
+//     types: Set<string>
+// ): [CompositeGeneratorNode, CompositeGeneratorNode] {
+//     const init = new CompositeGeneratorNode();
+//     const method = new CompositeGeneratorNode();
+//     const type = action.actionType?.split('.').at(-1) ?? 'DefaultActionType';
+//     types.add(type);
+//     init.append(`        # Action server for ${action.actionName}`);
+//     init.appendNewLine();
+//     init.append(
+//         `        self.action_server_${action.actionName} = rclpy.action.ActionServer(`
+//     );
+//     init.appendNewLine();
+//     init.append(
+//         `            self, ${type}, '${action.actionName}', self.execute_${action.actionName})`
+//     );
+//     init.appendNewLine();
 
-    method.append(`    def execute_${action.actionName}(self, goal_handle):`);
-    method.appendNewLine();
-    method.append(
-        `        self.get_logger().info('Executing goal: ${action.goal}')`
-    );
-    method.appendNewLine();
-    method.append(`        # TODO: Add feedback publishing`);
-    method.appendNewLine();
-    method.append(`        goal_handle.succeed()`);
-    method.appendNewLine();
-    method.append(`        result = ${type}.Result()`);
-    method.appendNewLine();
-    method.append(`        result.result = "${action.result}"`);
-    method.appendNewLine();
-    method.append(`        return result`);
-    method.appendNewLine();
+//     method.append(`    def execute_${action.actionName}(self, goal_handle):`);
+//     method.appendNewLine();
+//     method.append(
+//         `        self.get_logger().info('Executing goal: ${action.goal}')`
+//     );
+//     method.appendNewLine();
+//     method.append(`        # TODO: Add feedback publishing`);
+//     method.appendNewLine();
+//     method.append(`        goal_handle.succeed()`);
+//     method.appendNewLine();
+//     method.append(`        result = ${type}.Result()`);
+//     method.appendNewLine();
+//     method.append(`        result.result = "${action.result}"`);
+//     method.appendNewLine();
+//     method.append(`        return result`);
+//     method.appendNewLine();
 
-    return [init, method];
-}
+//     return [init, method];
+// }
