@@ -298,8 +298,10 @@ function compileCallback(
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const method = new CompositeGeneratorNode();
+
     const callbackName = callback.name;
     const kind = callback.kind;
+    const target = callback.target ?? callbackName;
     const execTime = callback.expectedExecTime;
 
     if (kind === 'timer') {
@@ -315,8 +317,8 @@ function compileCallback(
         method.appendNewLine();
 
     } else if (kind === 'subscriber') {
-        init.append(`        self.subscription_${callbackName} = self.create_subscription(`);
-        init.append(`String, '${callbackName}_topic', self.callback_${callbackName}, ${execTime})`);
+        init.append(`        self.subscription_${target} = self.create_subscription(`);
+        init.append(`String, '${target}', self.callback_${callbackName}, 10)`);
         init.appendNewLine();
 
         method.append(`    @measure_execution_time()`);
@@ -327,8 +329,8 @@ function compileCallback(
         method.appendNewLine();
 
     } else if (kind === 'service') {
-        init.append(`        self.service_${callbackName} = self.create_service(`);
-        init.append(`Empty, '${callbackName}_service', self.callback_${callbackName})`);
+        init.append(`        self.service_${target} = self.create_service(`);
+        init.append(`Empty, '${target}', self.callback_${callbackName})`);
         init.appendNewLine();
 
         method.append(`    @measure_execution_time()`);
@@ -341,7 +343,7 @@ function compileCallback(
         method.appendNewLine();
 
     } else if (kind === 'action') {
-        init.append(`        self.action_server_${callbackName} = rclpy.action.ActionServer(self, Empty, '${callbackName}_action', self.callback_${callbackName})`);
+        init.append(`        self.action_server_${target} = rclpy.action.ActionServer(self, Empty, '${target}', self.callback_${callbackName})`);
         init.appendNewLine();
 
         method.append(`    @measure_execution_time()`);

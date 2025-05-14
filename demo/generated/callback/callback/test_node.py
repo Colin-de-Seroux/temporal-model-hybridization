@@ -8,13 +8,36 @@ from callback.timer_execution import measure_execution_time
 class testNodeNode(Node):
     def __init__(self):
         super().__init__('testNode')
+        self.subscription_my_sub = self.create_subscription(String, 'my_sub', self.listener_callback_my_sub, 10)
+
+        self.service_my_srv = self.create_service(example_interfaces/SetBool, 'my_srv', self.handle_my_srv)
+
+        # Action server for my_act
+        self.action_server_my_act = rclpy.action.ActionServer(
+            self, DefaultActionType, 'my_act', self.execute_my_act)
+
         self.timer_cb_timer = self.create_timer(1, self.callback_cb_timer)
 
-        self.subscription_cb_sub = self.create_subscription(String, 'cb_sub_topic', self.callback_cb_sub, 10.0)
+        self.subscription_my_sub = self.create_subscription(String, 'my_sub', self.callback_cb_sub, 10)
 
-        self.service_cb_srv = self.create_service(Empty, 'cb_srv_service', self.callback_cb_srv)
+        self.service_my_srv = self.create_service(Empty, 'my_srv', self.callback_cb_srv)
 
-        self.action_server_cb_act = rclpy.action.ActionServer(self, Empty, 'cb_act_action', self.callback_cb_act)
+        self.action_server_my_act = rclpy.action.ActionServer(self, Empty, 'my_act', self.callback_cb_act)
+
+    def listener_callback_my_sub(self, msg):
+        self.get_logger().info('data received')
+
+    def handle_my_srv(self, request, response):
+        # TODO: Implement service logic
+        return response
+
+    def execute_my_act(self, goal_handle):
+        self.get_logger().info('Executing goal: goal data')
+        # TODO: Add feedback publishing
+        goal_handle.succeed()
+        result = DefaultActionType.Result()
+        result.result = "result data"
+        return result
 
     @measure_execution_time()
     def callback_cb_timer(self):

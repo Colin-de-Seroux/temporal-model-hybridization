@@ -1,3 +1,5 @@
+import os 
+from glob import glob 
 from setuptools import find_packages,setup
 
 package_name = 'test'
@@ -9,7 +11,8 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', 
             ['resource/' + package_name]),
-        ('share/'+package_name, ['package.xml']),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*_launch.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,8 +25,8 @@ setup(
         'console_scripts': [
             'talker = test.talker:main',
             'listeningistener = test.listeningistener:main',
-            'servicehandler = test.serviceHandler:main',
-            'actionexecutor = test.actionExecutor:main'
+            'service_handler = test.service_handler:main',
+            'action_executor = test.action_executor:main'
         ],
     },
 )

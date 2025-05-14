@@ -39,7 +39,7 @@ Logger:
     'log' level=LEVEL msg=STRING;
 
 Callback:
-    'callback' name=ID 'on' kind=('subscriber' | 'timer' | 'service' | 'action')
+    'callback' name=ID 'on' kind=('subscriber' | 'timer' | 'service' | 'action') target=ID?
     'expectedExecTime' expectedExecTime=DOUBLE 'ms';
 
 TemporalConstraint:
