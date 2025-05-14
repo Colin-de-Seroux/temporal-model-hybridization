@@ -147,6 +147,8 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 
     node.callbackFunctions?.forEach((callback) => {
         methods.appendNewLine();
+        methods.append(`    @measure_execution_time`);
+        methods.appendNewLine();
         methods.append(
             `    def ${callback.name}(self${callback.type === 'Subscriber' ? ', msg' : ''}):`
         );
