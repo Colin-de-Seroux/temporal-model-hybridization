@@ -1,0 +1,25 @@
+logger info
+
+node 'Talker' 10.0
+steps {
+    log info 'Talker init'
+    publisher 'pub' String 'chatter' 10
+    timer 'tmr' 1.0 'timer_callback'
+    log info 'Talker was launch'
+}
+callbackFunction 'timer_callback' Publisher
+steps {
+    log info "'Publishing: Hello World!'"
+    publish 'pub' "String(data='Hello World!')"
+}
+
+node 'Listener' 10.0
+steps {
+    log info 'Listener init'
+    subscriber 'sub' String 'chatter' 'chatter_callback' 10
+}
+callbackFunction 'chatter_callback' Subscriber
+steps {
+    log info "'I heard: [%s]' % msg.data"
+    service 'wait_2s' 2000.0
+}

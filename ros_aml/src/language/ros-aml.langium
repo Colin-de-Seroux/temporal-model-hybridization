@@ -37,12 +37,10 @@ CallbackFunction:
     steps=Steps?;
 
 Service:
-    'service' name=STRING estimatedExecutionTime=DOUBLE
-    (logs+=Logger)*;
+    'service' name=STRING estimatedExecutionTime=DOUBLE;
 
 Action:
-    'action' name=STRING estimatedExecutionTime=DOUBLE
-    (logs+=Logger)*;
+    'action' name=STRING estimatedExecutionTime=DOUBLE;
 
 Publish:
     'publish' publisherName=STRING msg=STRING;
