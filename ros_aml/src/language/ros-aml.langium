@@ -2,8 +2,9 @@ grammar RosAml
 
 entry Model:
     logger=LoggerLevel
+    nodes+=Node*
+    constraints+=TemporalConstraint*;
 
-    nodes+=Node*;
 
 LoggerLevel:
     'logger' level=LEVEL;
@@ -11,7 +12,13 @@ LoggerLevel:
 Node:
     'node' name=ID 
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    (publishers+=Publisher | subscribers+=Subscriber | services+=Service | actions+=Action | logs+=Logger)*;
+    ('activationPeriod' activationPeriod=DOUBLE 'ms')?
+    (callbacks+=Callback |
+    publishers+=Publisher | 
+    subscribers+=Subscriber | 
+    services+=Service | 
+    actions+=Action | 
+    logs+=Logger)*;
 
 Publisher:
     'publish' topicName=ID ('type' msgType=STRING)? 'message' msg=STRING;
@@ -31,9 +38,55 @@ Action:
 Logger:
     'log' level=LEVEL msg=STRING;
 
+Callback:
+    'callback' name=ID 'on' kind=('subscriber' | 'timer' | 'service' | 'action')
+    'expectedExecTime' expectedExecTime=DOUBLE 'ms';
+
+TemporalConstraint:
+    PrecedenceConstraint |
+    InvariantConstraint |
+    DeadlineConstraint |
+    DriftDetection;
+
+PrecedenceConstraint:
+    'precedence' source=CallbackRef '->' target=CallbackRef 'within' maxDelay=DOUBLE 'ms';
+
+CallbackRef:
+    Callback | Node;
+
+InvariantConstraint:
+    'invariant' invariantType=InvariantType;
+
+InvariantType:
+    MinInterEventTime | MaxInterEventTime | MaxJitter;
+
+
+MinInterEventTime:
+    'minInterEventTime' from=CommEntity 'to' to=CommEntity '>=' delay=DOUBLE 'ms';
+
+MaxInterEventTime:
+    'maxInterEventTime' from=CommEntity 'to' to=CommEntity '<=' delay=DOUBLE 'ms';
+
+MaxJitter:
+    'jitter' on=CallbackRef '<=' value=DOUBLE 'ms';
+
+DeadlineConstraint:
+    'deadline' on=CallbackRef '<=' deadline=DOUBLE 'ms';
+
+DriftDetection:
+    'monitorDrift'
+        'on' target=CallbackRef
+        'for' metric=DriftMetric
+        'threshold' threshold=DOUBLE 'ms'
+        ('logLevel' level=LEVEL)?;
+    
+CommEntity:
+    Publisher | Subscriber | Callback;
+
+
+terminal DriftMetric: 'execTime' | 'jitter' | 'activationPeriod' | 'interEventTime';
 terminal LEVEL: "debug" | "info" | "warning" | "error";
 terminal ID: /[_a-zA-Z][\w_]*/;
-terminal QualifiedName: ID ('.' ID)*;
 terminal INT returns number: /[0-9]+/;
 terminal FLOAT: /[0-9]+\.[0-9]+/;
 terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
