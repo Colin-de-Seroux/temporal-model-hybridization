@@ -1,0 +1,7 @@
+logger info
+
+node testNode expectedExecTime 10.0 ms
+    callback cb_timer on timer expectedExecTime 1000.0 ms
+    callback cb_sub on subscriber expectedExecTime 10.0 ms
+    callback cb_srv on service expectedExecTime 20.0 ms
+    callback cb_act on action expectedExecTime 30.0 ms

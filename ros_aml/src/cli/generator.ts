@@ -1,5 +1,6 @@
 import {
     Action,
+    Callback,
     Publisher,
     Service,
     Subscriber,
@@ -150,6 +151,15 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
         methods.appendNewLine();
     });
 
+    node.callbacks?.forEach((callback) => {
+        const [initCode, methodCode] = compileCallback(callback);
+        constructorBody.append(initCode);
+        constructorBody.appendNewLine();
+        methods.append(methodCode);
+        methods.appendNewLine();
+    });
+
+
     nodeBlock.append(constructorBody);
     nodeBlock.append(methods);
 
@@ -279,6 +289,74 @@ function compileAction(
     method.appendNewLine();
     method.append(`        return result`);
     method.appendNewLine();
+
+    return [init, method];
+}
+
+function compileCallback(
+    callback: Callback
+): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const method = new CompositeGeneratorNode();
+    const callbackName = callback.name;
+    const kind = callback.kind;
+    const execTime = callback.expectedExecTime;
+
+    if (kind === 'timer') {
+        init.append(`        self.timer_${callbackName} = self.create_timer(`);
+        init.append(`${Number(execTime) / 1000}, self.callback_${callbackName})`);
+        init.appendNewLine();
+
+        method.append(`    @measure_execution_time()`);
+        method.appendNewLine();
+        method.append(`    def callback_${callbackName}(self):`);
+        method.appendNewLine();
+        method.append(`        self.get_logger().info('Timer callback ${callbackName} triggered')`);
+        method.appendNewLine();
+
+    } else if (kind === 'subscriber') {
+        init.append(`        self.subscription_${callbackName} = self.create_subscription(`);
+        init.append(`String, '${callbackName}_topic', self.callback_${callbackName}, ${execTime})`);
+        init.appendNewLine();
+
+        method.append(`    @measure_execution_time()`);
+        method.appendNewLine();
+        method.append(`    def callback_${callbackName}(self, msg):`);
+        method.appendNewLine();
+        method.append(`        self.get_logger().info('Subscriber callback ${callbackName} received: ' + str(msg.data))`);
+        method.appendNewLine();
+
+    } else if (kind === 'service') {
+        init.append(`        self.service_${callbackName} = self.create_service(`);
+        init.append(`Empty, '${callbackName}_service', self.callback_${callbackName})`);
+        init.appendNewLine();
+
+        method.append(`    @measure_execution_time()`);
+        method.appendNewLine();
+        method.append(`    def callback_${callbackName}(self, request, response):`);
+        method.appendNewLine();
+        method.append(`        self.get_logger().info('Service callback ${callbackName} triggered')`);
+        method.appendNewLine();
+        method.append(`        return response`);
+        method.appendNewLine();
+
+    } else if (kind === 'action') {
+        init.append(`        self.action_server_${callbackName} = rclpy.action.ActionServer(self, Empty, '${callbackName}_action', self.callback_${callbackName})`);
+        init.appendNewLine();
+
+        method.append(`    @measure_execution_time()`);
+        method.appendNewLine();
+        method.append(`    def callback_${callbackName}(self, goal_handle):`);
+        method.appendNewLine();
+        method.append(`        self.get_logger().info('Action callback ${callbackName} executing')`);
+        method.appendNewLine();
+        method.append(`        goal_handle.succeed()`);
+        method.appendNewLine();
+        method.append(`        result = Empty.Result()`); 
+        method.appendNewLine();
+        method.append(`        return result`);
+        method.appendNewLine();
+    }
 
     return [init, method];
 }
