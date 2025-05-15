@@ -271,6 +271,23 @@ function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
         compileTopicTrigger(behavior, nodeBlock, methodName);
         
     }
+    if (behavior.trigger.service) {
+        nodeBlock.append(`        # TODO: Implement service trigger`);
+        nodeBlock.appendNewLine();
+    }
+    if (behavior.trigger.action) {
+        nodeBlock.append(`        # TODO: Implement action trigger`);
+        nodeBlock.appendNewLine();
+    }
+    if (behavior.trigger.param) {
+        nodeBlock.append(`        # TODO: Implement parameter trigger`);
+        nodeBlock.appendNewLine();
+    }
+    if (behavior.trigger.state) {
+        nodeBlock.append(`        # TODO: Implement state trigger`);
+        nodeBlock.appendNewLine();
+    }
+    
     return nodeBlock;
 }
 
