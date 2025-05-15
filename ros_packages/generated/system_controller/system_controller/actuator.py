@@ -28,14 +28,14 @@ class ActuatorNode(Node):
             self.on_stateChanged_actuatorStatus()
 
 
-    def main(args=None):
-        rclpy.init(args=args)
-        node = ActuatorNode()
-        try:
-            rclpy.spin(node)
-        except (KeyboardInterrupt, ExternalShutdownException):
-            pass
-        finally:
-            node.destroy_node()
-            rclpy.try_shutdown()
+def main(args=None):
+    rclpy.init(args=args)
+    node = ActuatorNode()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.try_shutdown()
     

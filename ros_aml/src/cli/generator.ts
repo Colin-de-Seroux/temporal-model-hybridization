@@ -291,16 +291,16 @@ function compileMain(node: Node): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
     nodeBlock.appendNewLine();
     nodeBlock.append(`
-    def main(args=None):
-        rclpy.init(args=args)
-        node = ${node.name}Node()
-        try:
-            rclpy.spin(node)
-        except (KeyboardInterrupt, ExternalShutdownException):
-            pass
-        finally:
-            node.destroy_node()
-            rclpy.try_shutdown()
+def main(args=None):
+    rclpy.init(args=args)
+    node = ${node.name}Node()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.try_shutdown()
     `);
     return nodeBlock;
 }
