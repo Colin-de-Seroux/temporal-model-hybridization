@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
+
 class ActuatorNode(Node):
     def __init__(self):
         super().__init__('Actuator')
@@ -21,7 +22,7 @@ class ActuatorNode(Node):
 
     @measure_execution_time()
     def on_stateChanged_actuatorStatus(self):
-        self.get_logger().debug('Actuator status updated')
+        self.get_logger().debug("Actuator status updated")
     
     def on_state_changed(self):
         if self.actuatorStatus == True:

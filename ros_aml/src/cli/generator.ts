@@ -1,5 +1,4 @@
 import {
-    Action,
     ActivationPattern,
     Behavior,
     Model,
@@ -102,6 +101,9 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from ${pkgName}.timer_execution import measure_execution_time`);
     nodeBlock.appendNewLine();
+    nodeBlock.appendNewLine();
+
+
 
     nodeBlock.append(`class ${node.name}Node(Node):`);
     nodeBlock.appendNewLine();
@@ -148,23 +150,76 @@ function getBehaviorMethodName(behavior: Behavior): string {
     return 'on_unknown_trigger';
 }
 
-function generateActionCode(action: Action): string {
+function generateActionCode(action: any): string {
     switch (action.$type) {
         case 'SendMessage':
-            return `        # Envoi d'un message\n        self.get_logger().info("sendMessage not implemented yet")`;
+            return generateSendMessageCode(action);
         case 'LogMessage':
-            return `        self.get_logger().${action.level}('${action.message}')`;
+            return generateLogMessageCode(action);
         case 'CallService':
-            return `        # Appel de service ${action.service}\n        self.get_logger().info("callService not implemented yet")`;
+            return generateCallServiceCode(action);
         case 'SetParam':
-            return `        self.set_parameters([rclpy.parameter.Parameter('${action.param}', value=${generateValueCode(action.value)})])`;
+            return generateSetParamCode(action);
         case 'GetParam':
-            return `        val = self.get_parameter('${action.param}').value\n        self.get_logger().info(f"Param ${action.param} = {val}")`;
+            return generateGetParamCode(action);
         case 'UpdateState':
-            return `        self.${action.state} = ${generateValueCode(action.value)}`;
+            return generateUpdateStateCode(action);
         default:
             return `        # Action non gérée`;
     }
+}
+
+function generateSendMessageCode(action: any): string {
+    const topic = action.topic;
+    const msg = action.message; 
+    //const qos = action.qos ? (action.qos === 'reliable' ? 'reliable' : 'best_effort') : 'best_effort';
+
+    return `        if not hasattr(self, 'publisher_${topic}'):
+            self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)
+        self.publisher_${topic}.publish(String(data='${msg}'))`;
+}
+
+function generateLogMessageCode(action: any): string {
+    const level = action.level || 'info';
+    const msg = action.message.replace(/"/g, '\\"');
+    return `        self.get_logger().${level}("${msg}")`;
+}
+
+function generateCallServiceCode(action: any): string {
+    const srv = action.service;
+    const req = action.request.replace(/"/g, '\\"');
+    return `        # TODO: Implémenter l'appel service ${srv}
+        # Exemple :
+        # client = self.create_client(ServiceType, '${srv}')
+        # while not client.wait_for_service(timeout_sec=1.0):
+        #     self.get_logger().warn('Service not available, waiting...')
+        # req = ServiceType.Request()
+        # req.data = ${req}
+        # future = client.call_async(req)
+        # rclpy.spin_until_future_complete(self, future)
+        # if future.result() is not None:
+        #     self.get_logger().info('Service call succeeded')
+        # else:
+        #     self.get_logger().error('Service call failed')
+        pass`;
+}
+
+function generateSetParamCode(action: any): string {
+    const param = action.param;
+    const valCode = generateValueCode(action.value);
+    return `        self.set_parameters([rclpy.parameter.Parameter('${param}', value=${valCode})])`;
+}
+
+function generateGetParamCode(action: any): string {
+    const param = action.param;
+    return `        val = self.get_parameter('${param}').value
+        self.get_logger().info(f"Param ${param} = {val}")`;
+}
+
+function generateUpdateStateCode(action: any): string {
+    const state = action.state;
+    const valCode = generateValueCode(action.value);
+    return `        self.${state} = ${valCode}`;
 }
 
 function generateValueCode(value: Value | undefined): string {
@@ -209,7 +264,19 @@ function compileTimer(timer: Timer): CompositeGeneratorNode {
     return nodeBlock;
 }
 
-function compilePeridodicActivation(period: number): CompositeGeneratorNode {
+function compileActivation(activation: ActivationPattern) : CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    if (activation.timer) {
+        nodeBlock.append(compilePeridodicActivation(activation.timer));
+            
+    } else if (activation.source) {
+        nodeBlock.append(compileEventDrivenActivation(activation.source));
+        
+    }
+    return nodeBlock;
+}
+
+function compilePeridodicActivation(period: string): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
     const periodSec = typeof period === 'number' ? (period / 1000).toFixed(3) : '1.000';
     nodeBlock.append(
@@ -217,21 +284,9 @@ function compilePeridodicActivation(period: number): CompositeGeneratorNode {
     );
     nodeBlock.appendNewLine();
     nodeBlock.append(
-        `        self.activation_timer = self.create_timer(${periodSec}, self.activation_callback)`
+        `        self.activation_timer = self.create_timer(${periodSec}, self.${period}_callback)`
     );
     nodeBlock.appendNewLine();
-    return nodeBlock;
-}
-
-function compileActivation(activation: ActivationPattern) : CompositeGeneratorNode {
-    const nodeBlock = new CompositeGeneratorNode();
-    if (activation.period) {
-        nodeBlock.append(compilePeridodicActivation(Number(activation.period)));
-            
-    } else if (activation.source) {
-        nodeBlock.append(compileEventDrivenActivation(activation.source));
-        
-    }
     return nodeBlock;
 }
 
@@ -263,13 +318,10 @@ function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
     nodeBlock.append(`    `);
 
     if (behavior.trigger.timer) {
-        compileTimerTrigger(behavior, nodeBlock,methodName);
-        
+        compileTimerTrigger(behavior, nodeBlock,methodName);   
     }
-
     if (behavior.trigger.topic) {
         compileTopicTrigger(behavior, nodeBlock, methodName);
-        
     }
     if (behavior.trigger.service) {
         compileServiceTrigger(behavior, nodeBlock, methodName);
@@ -330,6 +382,10 @@ function compileServiceTrigger(behavior: Behavior, nodeBlock: CompositeGenerator
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
+    nodeBlock.append(`        response.success = True`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        response.message = "Traitement lancé"`);   
+    nodeBlock.appendNewLine();    
     nodeBlock.append(`        return response`);
     nodeBlock.appendNewLine();
 }

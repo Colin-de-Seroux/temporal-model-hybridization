@@ -28,7 +28,7 @@ Timer:
     'timer' name=ID 'period' period=DOUBLE 'ms';
 
 ActivationPattern:
-    'periodic' period=DOUBLE 'ms' |
+    'periodic' timer=ID |
     'event-driven' source=ID;
 
 Behavior:

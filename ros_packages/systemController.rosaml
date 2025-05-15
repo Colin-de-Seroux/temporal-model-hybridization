@@ -4,7 +4,6 @@ logger info
 
 node Sensor
     expectedExecTime  5.0 ms
-    activation periodic 100.0 ms
     param samplingRate default 10
     state sensorStatus initial "idle"
     timer readTimer period 100.0 ms
@@ -13,7 +12,6 @@ node Sensor
     
 node Processing
     expectedExecTime 10.0 ms
-    activation event-driven SensorNode
     param processingMode default "normal"
     state processState initial "waiting"
     when messageReceived sensorData do callService dataProcessingService "{'data': 'temperature_reading'}" expectedTime 8.0 ms
