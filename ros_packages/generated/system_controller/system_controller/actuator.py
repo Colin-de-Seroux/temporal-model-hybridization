@@ -23,6 +23,10 @@ class ActuatorNode(Node):
     def on_stateChanged_actuatorStatus(self):
         self.get_logger().debug('Actuator status updated')
     
+    def on_state_changed(self):
+        if self.actuatorStatus == True:
+            self.on_stateChanged_actuatorStatus()
+
 
     def main(args=None):
         rclpy.init(args=args)

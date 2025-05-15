@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
+
 class ProcessingNode(Node):
     def __init__(self):
         super().__init__('Processing')
@@ -24,6 +25,10 @@ class ProcessingNode(Node):
     def on_serviceRequest_dataProcessingService(self):
         self.processState = 'processing'
     
+    def dataProcessingService_callback(self, request, response):
+        self.on_serviceRequest_dataProcessingService()
+        return response
+
 
     def main(args=None):
         rclpy.init(args=args)

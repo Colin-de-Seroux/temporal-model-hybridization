@@ -3,6 +3,7 @@ from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
+
 class SensorNode(Node):
     def __init__(self):
         super().__init__('Sensor')
@@ -25,6 +26,11 @@ class SensorNode(Node):
     def on_paramChanged_samplingRate(self):
         self.get_logger().info('Sampling rate changed')
     
+    def on_parameter_event(self, event):
+        for changed_param in event.changed_parameters:
+            if changed_param.name == 'samplingRate':
+                self.on_paramChanged_samplingRate()
+
 
     def main(args=None):
         rclpy.init(args=args)

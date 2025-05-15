@@ -272,20 +272,16 @@ function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
         
     }
     if (behavior.trigger.service) {
-        nodeBlock.append(`        # TODO: Implement service trigger`);
-        nodeBlock.appendNewLine();
+        compileServiceTrigger(behavior, nodeBlock, methodName);
     }
     if (behavior.trigger.action) {
-        nodeBlock.append(`        # TODO: Implement action trigger`);
-        nodeBlock.appendNewLine();
+        compileActionTrigger(behavior, nodeBlock, methodName);
     }
     if (behavior.trigger.param) {
-        nodeBlock.append(`        # TODO: Implement parameter trigger`);
-        nodeBlock.appendNewLine();
+        compileParamTrigger(behavior, nodeBlock, methodName);
     }
     if (behavior.trigger.state) {
-        nodeBlock.append(`        # TODO: Implement state trigger`);
-        nodeBlock.appendNewLine();
+        compileStateTrigger(behavior, nodeBlock, methodName);
     }
     
     return nodeBlock;
@@ -326,6 +322,57 @@ function compileTopicTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNo
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
 }
+
+function compileServiceTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const serviceName = behavior.trigger.service;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def ${serviceName}_callback(self, request, response):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        self.${methodName}()`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        return response`);
+    nodeBlock.appendNewLine();
+}
+
+function compileActionTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const actionName = behavior.trigger.action;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def ${actionName}_callback(self, goal_handle):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        self.${methodName}()`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        goal_handle.succeed()`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        result = ... # TODO: définir le type et la réponse`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        return result`);
+    nodeBlock.appendNewLine();
+}
+
+function compileParamTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const paramName = behavior.trigger.param;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def on_parameter_event(self, event):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        for changed_param in event.changed_parameters:`); 
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`            if changed_param.name == '${paramName}':`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`                self.${methodName}()`);
+    nodeBlock.appendNewLine();
+}
+
+function compileStateTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const stateName = behavior.trigger.state;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def on_state_changed(self):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        if self.${stateName} == True:`); 
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`            self.${methodName}()`);
+    nodeBlock.appendNewLine();
+}
+
 /*
 
 /*
