@@ -263,21 +263,13 @@ function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
     nodeBlock.append(`    `);
 
     if (behavior.trigger.timer) {
-        const timerName = behavior.trigger.timer;
-        nodeBlock.appendNewLine();
-        nodeBlock.append(`    def ${timerName}_callback(self):`);
-        nodeBlock.appendNewLine();
-        nodeBlock.append(`        self.${methodName}()`);
-        nodeBlock.appendNewLine();
+        compileTimerTrigger(behavior, nodeBlock,methodName);
+        
     }
 
     if (behavior.trigger.topic) {
-        const topicName = behavior.trigger.topic;
-        nodeBlock.appendNewLine();
-        nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
-        nodeBlock.appendNewLine();
-        nodeBlock.append(`        self.${methodName}()`);
-        nodeBlock.appendNewLine();
+        compileTopicTrigger(behavior, nodeBlock, methodName);
+        
     }
     return nodeBlock;
 }
@@ -299,6 +291,26 @@ function compileMain(node: Node): CompositeGeneratorNode {
     `);
     return nodeBlock;
 }
+
+function compileTimerTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const timerName = behavior.trigger.timer;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def ${timerName}_callback(self):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        self.${methodName}()`);
+    nodeBlock.appendNewLine();
+}
+
+function compileTopicTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const topicName = behavior.trigger.topic;
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        self.${methodName}()`);
+    nodeBlock.appendNewLine();
+}
+/*
+
 /*
 function compileLogger(level: string, msg: string): CompositeGeneratorNode {
     const node = new CompositeGeneratorNode();
