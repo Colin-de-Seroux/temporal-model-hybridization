@@ -1,46 +1,67 @@
 grammar RosAml
 
 entry Model:
-    logger=LoggerLevel
+    systemName=ID?
+    logger=LoggerLevel?
     nodes+=Node*
     constraints+=TemporalConstraint*;
-
 
 LoggerLevel:
     'logger' level=LEVEL;
 
 Node:
-    'node' name=ID 
+    'node' name=ID
     'expectedExecTime' expectedExecTime=DOUBLE 'ms'
-    ('activationPeriod' activationPeriod=DOUBLE 'ms')?
-    (callbacks+=Callback |
-    publishers+=Publisher | 
-    subscribers+=Subscriber | 
-    services+=Service | 
-    actions+=Action | 
-    logs+=Logger)*;
+    ('activation' activation=ActivationPattern)?
+    params+=Parameter*
+    states+=State*
+    timers+=Timer*
+    behaviors+=Behavior*;
 
-Publisher:
-    'publish' topicName=ID ('type' msgType=STRING)? 'message' msg=STRING;
+Parameter:
+    'param' name=ID 'type' paramType=Type ('default' defaultValue=Value)?;
 
-Subscriber:
-    'subscribe' topicName=ID ('type' msgType=STRING)? msg=STRING;
+State:
+    'state' name=ID 'type' stateType=Type ('initial' initialValue=Value)?;
 
-Service:
-    'service' serviceName=ID ('type' srvType=STRING)?;
+Timer:
+    'timer' name=ID 'period' period=DOUBLE 'ms';
+
+ActivationPattern:
+    'periodic' period=DOUBLE 'ms' |
+    'event-driven' source=ID;
+
+Behavior:
+    'when' trigger=Trigger 'do' action=Action ('expectedTime' time=DOUBLE 'ms')?;
+
+Trigger:
+    'messageReceived' topic=ID |
+    'timerElapsed' timer=ID? |
+    'serviceRequest' service=ID |
+    'actionGoalReceived' action=ID |
+    'paramChanged' param=ID |
+    'stateChanged' state=ID;
 
 Action:
-    'action' actionName=ID ('type' actionType=STRING)? 
-    'goal' goal=STRING
-    'result' result=STRING
-    'feedback' feedback=STRING;
+    SendMessage | LogMessage | CallService | SetParam | GetParam | UpdateState;
 
-Logger:
-    'log' level=LEVEL msg=STRING;
+SendMessage:
+    'sendMessage' topic=ID message=STRING ('qos' qos=QoS)?;
 
-Callback:
-    'callback' name=ID 'on' kind=('subscriber' | 'timer' | 'service' | 'action') target=ID?
-    'expectedExecTime' expectedExecTime=DOUBLE 'ms';
+LogMessage:
+    'log' level=LEVEL message=STRING;
+
+CallService:
+    'callService' service=ID request=STRING;
+
+SetParam:
+    'setParam' param=ID value=Value;
+
+GetParam:
+    'getParam' param=ID;
+
+UpdateState:
+    'updateState' state=ID value=Value;
 
 TemporalConstraint:
     PrecedenceConstraint |
@@ -56,7 +77,6 @@ InvariantConstraint:
 
 InvariantType:
     MinInterEventTime | MaxInterEventTime | MaxJitter;
-
 
 MinInterEventTime:
     'minInterEventTime' from=ID 'to' to=ID '>=' delay=DOUBLE 'ms';
@@ -76,17 +96,18 @@ DriftDetection:
         'for' metric=DriftMetric
         'threshold' threshold=DOUBLE 'ms'
         ('logLevel' level=LEVEL)?;
-    
 
-
+terminal QoS:'reliable' | 'bestEffort';
+terminal Type:'int' | 'float' | 'string' | 'bool';
+terminal Value: INT | FLOAT | STRING | BOOL;
 terminal DriftMetric: 'execTime' | 'jitter' | 'activationPeriod' | 'interEventTime';
 terminal LEVEL: "debug" | "info" | "warning" | "error";
 terminal ID: /[_a-zA-Z][\w_]*/;
 terminal INT returns number: /[0-9]+/;
 terminal FLOAT: /[0-9]+\.[0-9]+/;
-terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
 terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
 terminal BOOL: 'true' | 'false';
+terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
 
 hidden terminal WS: /\s+/;
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
