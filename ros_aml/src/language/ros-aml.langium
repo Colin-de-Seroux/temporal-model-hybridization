@@ -19,10 +19,10 @@ Node:
     behaviors+=Behavior*;
 
 Parameter:
-    'param' name=ID 'type' paramType=Type ('default' defaultValue=Value)?;
+    'param' name=ID ('type' paramType=Type)? ('default' defaultValue=Value)?;
 
 State:
-    'state' name=ID 'type' stateType=Type ('initial' initialValue=Value)?;
+    'state' name=ID ('type' stateType=Type)? ('initial' initialValue=Value)?;
 
 Timer:
     'timer' name=ID 'period' period=DOUBLE 'ms';
@@ -99,7 +99,7 @@ DriftDetection:
 
 terminal QoS:'reliable' | 'bestEffort';
 terminal Type:'int' | 'float' | 'string' | 'bool';
-terminal Value: INT | FLOAT | STRING | BOOL;
+terminal Value: INT | FLOAT | DOUBLE | STRING | BOOL;
 terminal DriftMetric: 'execTime' | 'jitter' | 'activationPeriod' | 'interEventTime';
 terminal LEVEL: "debug" | "info" | "warning" | "error";
 terminal ID: /[_a-zA-Z][\w_]*/;
