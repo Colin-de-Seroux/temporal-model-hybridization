@@ -19,10 +19,10 @@ Node:
     behaviors+=Behavior*;
 
 Parameter:
-    'param' name=ID ('type' paramType=Type)? ('default' defaultValue=Value)?;
+    'param' name=ID ('default' defaultValue=Value)?;
 
 State:
-    'state' name=ID ('type' stateType=Type)? ('initial' initialValue=Value)?;
+    'state' name=ID ('initial' initialValue=Value)?;
 
 Timer:
     'timer' name=ID 'period' period=DOUBLE 'ms';
@@ -63,6 +63,13 @@ GetParam:
 UpdateState:
     'updateState' state=ID value=Value;
 
+Value:
+    intValue=INT | doubleValue=DOUBLE| boolValue=BOOL | stringValue=STRING ;
+
+QoS:
+    reliable='reliable' | 
+    bestEffort='bestEffort';
+
 TemporalConstraint:
     PrecedenceConstraint |
     InvariantConstraint |
@@ -97,17 +104,14 @@ DriftDetection:
         'threshold' threshold=DOUBLE 'ms'
         ('logLevel' level=LEVEL)?;
 
-terminal QoS:'reliable' | 'bestEffort';
-terminal Type:'int' | 'float' | 'string' | 'bool';
-terminal Value: INT | FLOAT | DOUBLE | STRING | BOOL;
 terminal DriftMetric: 'execTime' | 'jitter' | 'activationPeriod' | 'interEventTime';
 terminal LEVEL: "debug" | "info" | "warning" | "error";
 terminal ID: /[_a-zA-Z][\w_]*/;
+terminal DOUBLE : /[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?/;
 terminal INT returns number: /[0-9]+/;
-terminal FLOAT: /[0-9]+\.[0-9]+/;
-terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
-terminal BOOL: 'true' | 'false';
-terminal DOUBLE: /([0-9]+\.[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)/;
+terminal BOOL : 'true' | 'false';
+terminal STRING returns string: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
+
 
 hidden terminal WS: /\s+/;
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;

@@ -1,11 +1,13 @@
 import {
     Action,
-    Callback,
-    Publisher,
-    Service,
-    Subscriber,
-    type Model,
-    type Node,
+    ActivationPattern,
+    Behavior,
+    Model,
+    Node,
+    Parameter,
+    State,
+    Timer,
+    Value,
 } from '../language/generated/ast.js';
 import { CompositeGeneratorNode, toString } from 'langium/generate';
 import * as fs from 'node:fs';
@@ -23,7 +25,6 @@ import {
 } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
-import { resolveMessageType } from './utils/utils.js';
 
 export function generateRosScript(
     model: Model,
@@ -75,12 +76,12 @@ export function generateRosScript(
     );
     fs.writeFileSync(
         path.join(rootPath, 'entrypoint.sh'),
-        generateEntrypoint(pkgName, model.logger.level)
+        generateEntrypoint(pkgName, model.logger?.level ?? 'info')
     );
     fs.mkdirSync(path.join(rootPath, 'launch'), { recursive: true });
     fs.writeFileSync(
         path.join(rootPath, 'launch', `${pkgName}_launch.py`),
-        generateLaunchFile(pkgName, model.nodes, model.logger.level)
+        generateLaunchFile(pkgName, model.nodes, model.logger?.level ?? 'info')
     );
 
     return rootPath;
@@ -88,10 +89,8 @@ export function generateRosScript(
 
 function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
-
-    const constructorBody = new CompositeGeneratorNode();
-    const methods = new CompositeGeneratorNode();
-    const types = new Set<string>();
+    //const constructorBody = new CompositeGeneratorNode();
+    //const methods = new CompositeGeneratorNode();
 
     nodeBlock.append(`import rclpy`);
     nodeBlock.appendNewLine();
@@ -99,88 +98,208 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.executors import ExternalShutdownException`);
     nodeBlock.appendNewLine();
-    nodeBlock.append(
-        `from std_msgs.msg import String, Int32, Float32, Bool, Header`
-    );
+    nodeBlock.append(`from std_msgs.msg import String, Int32, Float32, Bool, Header`);
     nodeBlock.appendNewLine();
-    nodeBlock.append(
-        `from ${pkgName}.timer_execution import measure_execution_time`
-    );
-    nodeBlock.appendNewLine();
-    nodeBlock.appendNewLine();
+    nodeBlock.append(`from ${pkgName}.timer_execution import measure_execution_time`);
     nodeBlock.appendNewLine();
 
     nodeBlock.append(`class ${node.name}Node(Node):`);
     nodeBlock.appendNewLine();
+
     nodeBlock.append(`    def __init__(self):`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        super().__init__('${node.name}')`);
     nodeBlock.appendNewLine();
 
-    node.logs?.forEach((log) => {
-        constructorBody.append(compileLogger(log.level, log.msg));
-        constructorBody.appendNewLine();
-    });
+    if (node.activation) {
+            nodeBlock.append(compileActivation(node.activation));
+        }
 
-    node.publishers?.forEach((pub) => {
-        constructorBody.append(compilePublisher(pub, types));
-        constructorBody.appendNewLine();
-    });
+    for (const param of node.params) {
+        nodeBlock.append(compileParameter(param));
+    }
 
-    node.subscribers?.forEach((sub) => {
-        const [initCode, methodCode] = compileSubscriber(sub, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
+    for (const state of node.states) {
+        nodeBlock.append(compileState(state))
+    }
 
-    node.services?.forEach((service) => {
-        const [initCode, methodCode] = compileService(service, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
-
-    node.actions?.forEach((action) => {
-        const [initCode, methodCode] = compileAction(action, types);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
-
-    node.callbacks?.forEach((callback) => {
-        const [initCode, methodCode] = compileCallback(callback);
-        constructorBody.append(initCode);
-        constructorBody.appendNewLine();
-        methods.append(methodCode);
-        methods.appendNewLine();
-    });
-
-
-    nodeBlock.append(constructorBody);
-    nodeBlock.append(methods);
+    for (const timer of node.timers) {
+        nodeBlock.append(compileTimer(timer));
+    }
 
     nodeBlock.appendNewLine();
-    nodeBlock.append(`
-def main(args=None):
-    rclpy.init(args=args)
 
-    node = ${node.name}Node()
+    for (const behavior of node.behaviors) {
+        nodeBlock.append(compileBehavior(behavior));       
+    }
 
-    try:
-        rclpy.spin(node)
-    except (KeyboardInterrupt, ExternalShutdownException):
-        pass
-    finally:
-        node.destroy_node()
-        rclpy.try_shutdown()
-`);
+    nodeBlock.append(compileMain(node));
+
     return nodeBlock;
 }
 
+function getBehaviorMethodName(behavior: Behavior): string {
+    if (behavior.trigger.timer) return `on_timerElapsed_${behavior.trigger.timer}`;
+    if (behavior.trigger.topic) return `on_messageReceived_${behavior.trigger.topic}`;
+    if (behavior.trigger.service) return `on_serviceRequest_${behavior.trigger.service}`;
+    if (behavior.trigger.action) return `on_actionGoalReceived_${behavior.trigger.action}`;
+    if (behavior.trigger.param) return `on_paramChanged_${behavior.trigger.param}`;
+    if (behavior.trigger.state) return `on_stateChanged_${behavior.trigger.state}`;
+    return 'on_unknown_trigger';
+}
+
+function generateActionCode(action: Action): string {
+    switch (action.$type) {
+        case 'SendMessage':
+            return `        # Envoi d'un message\n        self.get_logger().info("sendMessage not implemented yet")`;
+        case 'LogMessage':
+            return `        self.get_logger().${action.level}('${action.message}')`;
+        case 'CallService':
+            return `        # Appel de service ${action.service}\n        self.get_logger().info("callService not implemented yet")`;
+        case 'SetParam':
+            return `        self.set_parameters([rclpy.parameter.Parameter('${action.param}', value=${generateValueCode(action.value)})])`;
+        case 'GetParam':
+            return `        val = self.get_parameter('${action.param}').value\n        self.get_logger().info(f"Param ${action.param} = {val}")`;
+        case 'UpdateState':
+            return `        self.${action.state} = ${generateValueCode(action.value)}`;
+        default:
+            return `        # Action non gérée`;
+    }
+}
+
+function generateValueCode(value: Value | undefined): string {
+    if (!value) return 'None'; 
+
+    if (value.intValue !== undefined) return value.intValue.toString();
+    if (value.doubleValue !== undefined) return value.doubleValue.toString();
+    if (value.stringValue !== undefined) return `'${value.stringValue}'`; 
+    if (value.boolValue !== undefined) return value.boolValue === 'true' ? 'True' : 'False';
+
+    return 'None'; 
+}
+
+
+
+function compileParameter(param: Parameter): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    const defaultVal = generateValueCode(param.defaultValue )?? 'None';
+    nodeBlock.append(`        self.declare_parameter('${param.name}', ${defaultVal})`);
+    nodeBlock.appendNewLine();
+
+    return nodeBlock;
+}
+
+function compileState(state: State): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    const initialVal = generateValueCode(state.initialValue) ?? 'None';
+    nodeBlock.append(`        self.${state.name} = ${initialVal}`);
+    nodeBlock.appendNewLine();
+
+    return nodeBlock;
+}
+
+function compileTimer(timer: Timer): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    const periodSec = (Number(timer.period) / 1000).toFixed(3);
+    nodeBlock.append(
+        `        self.${timer.name}_timer = self.create_timer(${periodSec}, self.${timer.name}_callback)`
+    );
+    nodeBlock.appendNewLine();
+
+    return nodeBlock;
+}
+
+function compilePeridodicActivation(period: number): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    const periodSec = typeof period === 'number' ? (period / 1000).toFixed(3) : '1.000';
+    nodeBlock.append(
+        `        # Activation périodique avec période ${period ?? 'undefined'} ms`
+    );
+    nodeBlock.appendNewLine();
+    nodeBlock.append(
+        `        self.activation_timer = self.create_timer(${periodSec}, self.activation_callback)`
+    );
+    nodeBlock.appendNewLine();
+    return nodeBlock;
+}
+
+function compileActivation(activation: ActivationPattern) : CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    if (activation.period) {
+        nodeBlock.append(compilePeridodicActivation(Number(activation.period)));
+            
+    } else if (activation.source) {
+        nodeBlock.append(compileEventDrivenActivation(activation.source));
+        
+    }
+    return nodeBlock;
+}
+
+function compileEventDrivenActivation(source: string): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    nodeBlock.append(
+        `        # Activation event-driven sur la source '${source}'`
+    );
+    nodeBlock.appendNewLine();
+    nodeBlock.append(
+        `        self.create_subscription(String, '${source}', self.activation_callback, 10)`
+    );
+    nodeBlock.appendNewLine();
+    return nodeBlock;
+}
+
+function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    const methodName = getBehaviorMethodName(behavior);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    @measure_execution_time()`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`    def ${methodName}(self):`);
+    nodeBlock.appendNewLine();
+
+    nodeBlock.append(generateActionCode(behavior.action));
+    nodeBlock.appendNewLine();
+
+    nodeBlock.append(`    `);
+
+    if (behavior.trigger.timer) {
+        const timerName = behavior.trigger.timer;
+        nodeBlock.appendNewLine();
+        nodeBlock.append(`    def ${timerName}_callback(self):`);
+        nodeBlock.appendNewLine();
+        nodeBlock.append(`        self.${methodName}()`);
+        nodeBlock.appendNewLine();
+    }
+
+    if (behavior.trigger.topic) {
+        const topicName = behavior.trigger.topic;
+        nodeBlock.appendNewLine();
+        nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
+        nodeBlock.appendNewLine();
+        nodeBlock.append(`        self.${methodName}()`);
+        nodeBlock.appendNewLine();
+    }
+    return nodeBlock;
+}
+
+function compileMain(node: Node): CompositeGeneratorNode {
+    const nodeBlock = new CompositeGeneratorNode();
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`
+    def main(args=None):
+        rclpy.init(args=args)
+        node = ${node.name}Node()
+        try:
+            rclpy.spin(node)
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass
+        finally:
+            node.destroy_node()
+            rclpy.try_shutdown()
+    `);
+    return nodeBlock;
+}
+/*
 function compileLogger(level: string, msg: string): CompositeGeneratorNode {
     const node = new CompositeGeneratorNode();
     node.append(`        self.get_logger().${level}('${msg}')`);
@@ -362,3 +481,4 @@ function compileCallback(
 
     return [init, method];
 }
+*/

@@ -24,7 +24,7 @@
         "serve": "npm run dev",
         "test": "vitest run",
         "cli:info": "node ./bin/cli",
-        "cli": "node ./bin/cli generate --destination ../demo/generated/",
+        "cli": "node ./bin/cli generate --destination ../ros_packages/generated/",
         "format": "prettier --write ."
     },
     "dependencies": {
