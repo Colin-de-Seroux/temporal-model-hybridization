@@ -6,35 +6,35 @@ from system_controller.timer_execution import measure_execution_time
 
 class ProcessingNode(Node):
     def __init__(self):
-        super().__init__('Processing')
+        super().__init__('processing')
         self.declare_parameter('processingMode', 'normal')
         self.processState = 'waiting'
+
+        self.client_dataProcessingService = self.create_client(ServiceType, 'dataProcessingService')
 
 
     @measure_execution_time()
     def on_messageReceived_sensorData(self):
-        # TODO: Implémenter l'appel service dataProcessingService
-        # Exemple :
-        # client = self.create_client(ServiceType, 'dataProcessingService')
-        # while not client.wait_for_service(timeout_sec=1.0):
-        #     self.get_logger().warn('Service not available, waiting...')
-        # req = ServiceType.Request()
-        # req.data = {'data': 'temperature_reading'}
-        # future = client.call_async(req)
-        # rclpy.spin_until_future_complete(self, future)
-        # if future.result() is not None:
-        #     self.get_logger().info('Service call succeeded')
-        # else:
-        #     self.get_logger().error('Service call failed')
-        pass
-    
+        while not self.client_dataProcessingService.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn('Service not available, waiting...')
+        req = ServiceType.Request()
+        req.data = {'data': 'temperature_reading'}
+        future = self.client_dataProcessingService.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        if future.result() is not None:
+            self.get_logger().info('Service call succeeded')
+        else:
+            self.get_logger().error('Service call failed')
+
+
     def sensorData_callback(self, msg):
         self.on_messageReceived_sensorData()
 
     @measure_execution_time()
     def on_serviceRequest_dataProcessingService(self):
         self.processState = 'processing'
-    
+
+
     def dataProcessingService_callback(self, request, response):
         self.on_serviceRequest_dataProcessingService()
         response.success = True

@@ -1,0 +1,7 @@
+subscriberSystem
+logger info
+
+node Subscriber
+    expectedExecTime 5.0 ms
+    timer msg_timer period 1000.0 ms
+    when messageReceived data_topic do log info "Message received on data_topic"

@@ -6,7 +6,6 @@ import {
     Parameter,
     State,
     Timer,
-    Value,
 } from '../language/generated/ast.js';
 import { CompositeGeneratorNode, toString } from 'langium/generate';
 import * as fs from 'node:fs';
@@ -24,6 +23,7 @@ import {
 } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
+import { generateValueCode, getBehaviorMethodName } from './utils/utils.js';
 
 export function generateRosScript(
     model: Model,
@@ -88,8 +88,9 @@ export function generateRosScript(
 
 function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
-    //const constructorBody = new CompositeGeneratorNode();
-    //const methods = new CompositeGeneratorNode();
+    const initBlock = new CompositeGeneratorNode();
+    const methodsBlock = new CompositeGeneratorNode();
+    const node_name_lower_case = node.name.toLowerCase()
 
     nodeBlock.append(`import rclpy`);
     nodeBlock.appendNewLine();
@@ -110,47 +111,42 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 
     nodeBlock.append(`    def __init__(self):`);
     nodeBlock.appendNewLine();
-    nodeBlock.append(`        super().__init__('${node.name}')`);
+    nodeBlock.append(`        super().__init__('${node_name_lower_case}')`);
     nodeBlock.appendNewLine();
 
     if (node.activation) {
-            nodeBlock.append(compileActivation(node.activation));
+            initBlock.append(compileActivation(node.activation));
         }
 
     for (const param of node.params) {
-        nodeBlock.append(compileParameter(param));
+        initBlock.append(compileParameter(param));
     }
 
     for (const state of node.states) {
-        nodeBlock.append(compileState(state))
+        initBlock.append(compileState(state))
     }
 
     for (const timer of node.timers) {
-        nodeBlock.append(compileTimer(timer));
+        initBlock.append(compileTimer(timer));
     }
 
-    nodeBlock.appendNewLine();
+    initBlock.appendNewLine();
 
     for (const behavior of node.behaviors) {
-        nodeBlock.append(compileBehavior(behavior));       
+        const [initCode, methodCode] = compileBehavior(behavior);
+        initBlock.append(initCode);
+        methodsBlock.append(methodCode);
     }
-
+    nodeBlock.append(initBlock);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(methodsBlock)
     nodeBlock.append(compileMain(node));
 
     return nodeBlock;
 }
 
-function getBehaviorMethodName(behavior: Behavior): string {
-    if (behavior.trigger.timer) return `on_timerElapsed_${behavior.trigger.timer}`;
-    if (behavior.trigger.topic) return `on_messageReceived_${behavior.trigger.topic}`;
-    if (behavior.trigger.service) return `on_serviceRequest_${behavior.trigger.service}`;
-    if (behavior.trigger.action) return `on_actionGoalReceived_${behavior.trigger.action}`;
-    if (behavior.trigger.param) return `on_paramChanged_${behavior.trigger.param}`;
-    if (behavior.trigger.state) return `on_stateChanged_${behavior.trigger.state}`;
-    return 'on_unknown_trigger';
-}
 
-function generateActionCode(action: any): string {
+function generateActionCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode]  {
     switch (action.$type) {
         case 'SendMessage':
             return generateSendMessageCode(action);
@@ -165,75 +161,110 @@ function generateActionCode(action: any): string {
         case 'UpdateState':
             return generateUpdateStateCode(action);
         default:
-            return `        # Action non gérée`;
+            const init = new CompositeGeneratorNode();
+            const exec = new CompositeGeneratorNode();
+            exec.append(`        # Action non gérée`);
+            return [init, exec];
     }
 }
 
-function generateSendMessageCode(action: any): string {
+function generateSendMessageCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode]  {
     const topic = action.topic;
-    const msg = action.message; 
+    const msg = action.message;
+    
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
     //const qos = action.qos ? (action.qos === 'reliable' ? 'reliable' : 'best_effort') : 'best_effort';
 
-    return `        if not hasattr(self, 'publisher_${topic}'):
-            self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)
-        self.publisher_${topic}.publish(String(data='${msg}'))`;
+    init.append(`        self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)`);
+    init.appendNewLine();
+
+    exec.append(`        self.publisher_${topic}.publish(String(data='${msg}'))`);
+    exec.appendNewLine();
+
+    return [init, exec];
 }
 
-function generateLogMessageCode(action: any): string {
+function generateLogMessageCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
     const level = action.level || 'info';
     const msg = action.message.replace(/"/g, '\\"');
-    return `        self.get_logger().${level}("${msg}")`;
+    exec.append(`        self.get_logger().${level}("${msg}")`);
+    exec.appendNewLine();
+
+    return [init, exec];
 }
 
-function generateCallServiceCode(action: any): string {
+function generateCallServiceCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
     const srv = action.service;
     const req = action.request.replace(/"/g, '\\"');
-    return `        # TODO: Implémenter l'appel service ${srv}
-        # Exemple :
-        # client = self.create_client(ServiceType, '${srv}')
-        # while not client.wait_for_service(timeout_sec=1.0):
-        #     self.get_logger().warn('Service not available, waiting...')
-        # req = ServiceType.Request()
-        # req.data = ${req}
-        # future = client.call_async(req)
-        # rclpy.spin_until_future_complete(self, future)
-        # if future.result() is not None:
-        #     self.get_logger().info('Service call succeeded')
-        # else:
-        #     self.get_logger().error('Service call failed')
-        pass`;
+
+    init.append(`        self.client_${srv} = self.create_client(ServiceType, '${srv}')`);
+    init.appendNewLine();
+
+    const callServiceLines = [
+        `        while not self.client_${srv}.wait_for_service(timeout_sec=1.0):`,
+        `            self.get_logger().warn('Service not available, waiting...')`,
+        `        req = ServiceType.Request()`,
+        `        req.data = ${req}`,
+        `        future = self.client_${srv}.call_async(req)`,
+        `        rclpy.spin_until_future_complete(self, future)`,
+        `        if future.result() is not None:`,
+        `            self.get_logger().info('Service call succeeded')`,
+        `        else:`,
+        `            self.get_logger().error('Service call failed')`
+    ];
+    for (const line of callServiceLines) {
+        exec.append(line);
+        exec.appendNewLine();
+    }
+
+    return [init, exec];
 }
 
-function generateSetParamCode(action: any): string {
+
+function generateSetParamCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
     const param = action.param;
     const valCode = generateValueCode(action.value);
-    return `        self.set_parameters([rclpy.parameter.Parameter('${param}', value=${valCode})])`;
+
+    exec.append(`        self.set_parameters([rclpy.parameter.Parameter('${param}', value=${valCode})])`);
+    exec.appendNewLine();
+
+    return [init, exec];
 }
 
-function generateGetParamCode(action: any): string {
+function generateGetParamCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
     const param = action.param;
-    return `        val = self.get_parameter('${param}').value
-        self.get_logger().info(f"Param ${param} = {val}")`;
+    exec.append(`        val = self.get_parameter('${param}').value`);
+    exec.appendNewLine();
+    exec.append(`        self.get_logger().info(f"Param ${param} = {val}")`);
+    exec.appendNewLine();
+
+    return [init, exec];
 }
 
-function generateUpdateStateCode(action: any): string {
+function generateUpdateStateCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
     const state = action.state;
     const valCode = generateValueCode(action.value);
-    return `        self.${state} = ${valCode}`;
+    exec.append(`        self.${state} = ${valCode}`);
+    exec.appendNewLine();
+
+    return [init, exec];
 }
-
-function generateValueCode(value: Value | undefined): string {
-    if (!value) return 'None'; 
-
-    if (value.intValue !== undefined) return value.intValue.toString();
-    if (value.doubleValue !== undefined) return value.doubleValue.toString();
-    if (value.stringValue !== undefined) return `'${value.stringValue}'`; 
-    if (value.boolValue !== undefined) return value.boolValue === 'true' ? 'True' : 'False';
-
-    return 'None'; 
-}
-
-
 
 function compileParameter(param: Parameter): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
@@ -303,40 +334,42 @@ function compileEventDrivenActivation(source: string): CompositeGeneratorNode {
     return nodeBlock;
 }
 
-function compileBehavior(behavior: Behavior): CompositeGeneratorNode {
-    const nodeBlock = new CompositeGeneratorNode();
+function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const initCode = new CompositeGeneratorNode();
+    const methodCode = new CompositeGeneratorNode();
     const methodName = getBehaviorMethodName(behavior);
-    nodeBlock.appendNewLine();
-    nodeBlock.append(`    @measure_execution_time()`);
-    nodeBlock.appendNewLine();
-    nodeBlock.append(`    def ${methodName}(self):`);
-    nodeBlock.appendNewLine();
 
-    nodeBlock.append(generateActionCode(behavior.action));
-    nodeBlock.appendNewLine();
+    methodCode.appendNewLine();
+    methodCode.append(`    @measure_execution_time()`);
+    methodCode.appendNewLine();
+    methodCode.append(`    def ${methodName}(self):`);
+    methodCode.appendNewLine();
 
-    nodeBlock.append(`    `);
+    const [actionInit, actionExec] = generateActionCode(behavior.action);
+    initCode.append(actionInit);
+    methodCode.append(actionExec);
+    methodCode.appendNewLine();
 
     if (behavior.trigger.timer) {
-        compileTimerTrigger(behavior, nodeBlock,methodName);   
+        compileTimerTrigger(behavior, methodCode,methodName);   
     }
     if (behavior.trigger.topic) {
-        compileTopicTrigger(behavior, nodeBlock, methodName);
+        compileTopicTrigger(behavior, methodCode, methodName);
     }
     if (behavior.trigger.service) {
-        compileServiceTrigger(behavior, nodeBlock, methodName);
+        compileServiceTrigger(behavior, methodCode, methodName);
     }
     if (behavior.trigger.action) {
-        compileActionTrigger(behavior, nodeBlock, methodName);
+        compileActionTrigger(behavior, methodCode, methodName);
     }
     if (behavior.trigger.param) {
-        compileParamTrigger(behavior, nodeBlock, methodName);
+        compileParamTrigger(behavior, methodCode, methodName);
     }
     if (behavior.trigger.state) {
-        compileStateTrigger(behavior, nodeBlock, methodName);
+        compileStateTrigger(behavior, methodCode, methodName);
     }
     
-    return nodeBlock;
+    return [initCode, methodCode];
 }
 
 function compileMain(node: Node): CompositeGeneratorNode {
@@ -429,7 +462,7 @@ function compileStateTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNo
     nodeBlock.appendNewLine();
 }
 
-/*
+
 
 /*
 function compileLogger(level: string, msg: string): CompositeGeneratorNode {
