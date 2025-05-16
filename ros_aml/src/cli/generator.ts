@@ -1,11 +1,23 @@
 import {
+    ActionGoalReceived,
     ActivationPattern,
     Behavior,
+    isActionGoalReceived,
+    isMessageReceived,
+    isParamChanged,
+    isServiceRequest,
+    isStateChanged,
+    isTimerElapsed,
+    MessageReceived,
     Model,
     Node,
+    ParamChanged,
     Parameter,
+    ServiceRequest,
     State,
+    StateChanged,
     Timer,
+    TimerElapsed,
 } from '../language/generated/ast.js';
 import { CompositeGeneratorNode, toString } from 'langium/generate';
 import * as fs from 'node:fs';
@@ -338,6 +350,7 @@ function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, Composite
     const initCode = new CompositeGeneratorNode();
     const methodCode = new CompositeGeneratorNode();
     const methodName = getBehaviorMethodName(behavior);
+    const triger = behavior.trigger
 
     methodCode.appendNewLine();
     methodCode.append(`    @measure_execution_time()`);
@@ -350,23 +363,23 @@ function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, Composite
     methodCode.append(actionExec);
     methodCode.appendNewLine();
 
-    if (behavior.trigger.timer) {
-        compileTimerTrigger(behavior, methodCode,methodName);   
+    if (isTimerElapsed(triger)) {
+        compileTimerTrigger(triger, methodCode,methodName);   
     }
-    if (behavior.trigger.topic) {
-        compileTopicTrigger(behavior, methodCode, methodName);
+    if (isMessageReceived(triger)) {
+        compileTopicTrigger(triger, methodCode, methodName);
     }
-    if (behavior.trigger.service) {
-        compileServiceTrigger(behavior, methodCode, methodName);
+    if (isServiceRequest(triger)) {
+        compileServiceTrigger(triger, methodCode, methodName);
     }
-    if (behavior.trigger.action) {
-        compileActionTrigger(behavior, methodCode, methodName);
+    if (isActionGoalReceived(triger)) {
+        compileActionTrigger(triger, methodCode, methodName);
     }
-    if (behavior.trigger.param) {
-        compileParamTrigger(behavior, methodCode, methodName);
+    if (isParamChanged(triger)) {
+        compileParamTrigger(triger, methodCode, methodName);
     }
-    if (behavior.trigger.state) {
-        compileStateTrigger(behavior, methodCode, methodName);
+    if (isStateChanged(triger)) {
+        compileStateTrigger(triger, methodCode, methodName);
     }
     
     return [initCode, methodCode];
@@ -390,8 +403,8 @@ def main(args=None):
     return nodeBlock;
 }
 
-function compileTimerTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const timerName = behavior.trigger.timer;
+function compileTimerTrigger(triger: TimerElapsed, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const timerName = triger.timer;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${timerName}_callback(self):`);
     nodeBlock.appendNewLine();
@@ -399,8 +412,8 @@ function compileTimerTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNo
     nodeBlock.appendNewLine();
 }
 
-function compileTopicTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const topicName = behavior.trigger.topic;
+function compileTopicTrigger(triger: MessageReceived, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const topicName = triger.topic;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
     nodeBlock.appendNewLine();
@@ -408,8 +421,8 @@ function compileTopicTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNo
     nodeBlock.appendNewLine();
 }
 
-function compileServiceTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const serviceName = behavior.trigger.service;
+function compileServiceTrigger(triger: ServiceRequest, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const serviceName = triger.service;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${serviceName}_callback(self, request, response):`);
     nodeBlock.appendNewLine();
@@ -423,8 +436,8 @@ function compileServiceTrigger(behavior: Behavior, nodeBlock: CompositeGenerator
     nodeBlock.appendNewLine();
 }
 
-function compileActionTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const actionName = behavior.trigger.action;
+function compileActionTrigger(triger: ActionGoalReceived, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const actionName = triger.action;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${actionName}_callback(self, goal_handle):`);
     nodeBlock.appendNewLine();
@@ -438,8 +451,8 @@ function compileActionTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorN
     nodeBlock.appendNewLine();
 }
 
-function compileParamTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const paramName = behavior.trigger.param;
+function compileParamTrigger(triger: ParamChanged, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const paramName = triger.param;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def on_parameter_event(self, event):`);
     nodeBlock.appendNewLine();
@@ -451,8 +464,8 @@ function compileParamTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNo
     nodeBlock.appendNewLine();
 }
 
-function compileStateTrigger(behavior: Behavior, nodeBlock: CompositeGeneratorNode,methodName: string): void {
-    const stateName = behavior.trigger.state;
+function compileStateTrigger(triger: StateChanged, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+    const stateName = triger.state;
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def on_state_changed(self):`);
     nodeBlock.appendNewLine();
