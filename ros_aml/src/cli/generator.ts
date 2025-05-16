@@ -367,7 +367,7 @@ function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, Composite
         compileTimerTrigger(triger, methodCode,methodName);   
     }
     if (isMessageReceived(triger)) {
-        compileTopicTrigger(triger, methodCode, methodName);
+        compileTopicTrigger(triger, methodCode, initCode,methodName);
     }
     if (isServiceRequest(triger)) {
         compileServiceTrigger(triger, methodCode, methodName);
@@ -412,8 +412,13 @@ function compileTimerTrigger(triger: TimerElapsed, nodeBlock: CompositeGenerator
     nodeBlock.appendNewLine();
 }
 
-function compileTopicTrigger(triger: MessageReceived, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+function compileTopicTrigger(triger: MessageReceived, nodeBlock: CompositeGeneratorNode,initCode:CompositeGeneratorNode,methodName: string): void {
     const topicName = triger.topic;
+    const messageType = 'String';
+    initCode.appendNewLine();
+    initCode.append(`        self.subscription_${topicName} = self.create_subscription(${messageType}, '${topicName}', self.${topicName}_callback, 10)`);
+    initCode.appendNewLine();
+
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
     nodeBlock.appendNewLine();

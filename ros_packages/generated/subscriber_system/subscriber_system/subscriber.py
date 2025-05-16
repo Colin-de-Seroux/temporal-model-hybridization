@@ -10,6 +10,8 @@ class SubscriberNode(Node):
         self.msg_timer_timer = self.create_timer(1.000, self.msg_timer_callback)
 
 
+        self.subscription_data_topic = self.create_subscription(String, 'data_topic', self.data_topic_callback, 10)
+
 
     @measure_execution_time()
     def on_messageReceived_data_topic(self):
