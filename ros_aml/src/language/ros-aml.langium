@@ -35,11 +35,29 @@ Behavior:
     'when' trigger=Trigger 'do' action=Action ('expectedTime' time=DOUBLE 'ms')?;
 
 Trigger:
-    'messageReceived' topic=ID |
-    'timerElapsed' timer=ID? |
-    'serviceRequest' service=ID |
-    'actionGoalReceived' action=ID |
-    'paramChanged' param=ID |
+    MessageReceived |
+    TimerElapsed |
+    ServiceRequest |
+    ActionGoalReceived |
+    ParamChanged |
+    StateChanged;
+
+MessageReceived:
+    'messageReceived' topic=ID;
+
+TimerElapsed:
+    'timerElapsed' timer=ID?;
+
+ServiceRequest:
+    'serviceRequest' service=ID;
+
+ActionGoalReceived:
+    'actionGoalReceived' action=ID;
+
+ParamChanged:
+    'paramChanged' param=ID;
+
+StateChanged:
     'stateChanged' state=ID;
 
 Action:
