@@ -1,6 +1,7 @@
 grammar RosAml
 
 entry Model:
+    systemName=STRING
     logger=LoggerLevel
 
     nodes+=Node*;

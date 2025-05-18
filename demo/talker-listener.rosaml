@@ -1,3 +1,4 @@
+'Talker listener'
 logger info
 
 node 'Talker' 10.0
