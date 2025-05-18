@@ -15,7 +15,7 @@
 
 RNN, LSTM, GRU, Modèles ARIMA 
 
-(Documentation sur les algorithmes de Machine Learning pour la prévision des séries temporelles)[https://medium.com/@ideaacademy/les-algorithmes-du-machine-learning-pour-la-pr%C3%A9vision-des-s%C3%A9ries-temporelles-partie-i-2b75abae4087]
+[Documentation sur les algorithmes de Machine Learning pour la prévision des séries temporelles](https://medium.com/@ideaacademy/les-algorithmes-du-machine-learning-pour-la-pr%C3%A9vision-des-s%C3%A9ries-temporelles-partie-i-2b75abae4087)
 
 ## Récupération des ressources utilisés
 
