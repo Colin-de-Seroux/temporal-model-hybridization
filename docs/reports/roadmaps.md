@@ -28,9 +28,9 @@ TODO
 
 TODO
 
-[Documentation officielle ROS 2](https://docs.ros.org/en/rolling/index.html)
+- [Documentation officielle ROS 2](https://docs.ros.org/en/rolling/index.html)
 
-[Documentation sur les algorithmes de Machine Learning pour la prévision des séries temporelles](https://medium.com/@ideaacademy/les-algorithmes-du-machine-learning-pour-la-pr%C3%A9vision-des-s%C3%A9ries-temporelles-partie-i-2b75abae4087)
+- [Documentation sur les algorithmes de Machine Learning pour la prévision des séries temporelles](https://medium.com/@ideaacademy/les-algorithmes-du-machine-learning-pour-la-pr%C3%A9vision-des-s%C3%A9ries-temporelles-partie-i-2b75abae4087)
 
 ## organisation du travail en équipe
 
