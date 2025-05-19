@@ -16,17 +16,26 @@ Les caractéristiques temporelles extraites devront être informatives et réinj
 
 ## Bilan sur ce qui a été réalisé
 
-- Création de packages simples à la main avec `ROS2`
-- Création de configurations `Docker` pour un lancement simplifié
-- Limitation des ressources utilisées par `Docker`
-- Recherche des différents modèles d’`IA` possibles pour une architecture avec des graphes
+- Etude de la `documentation` officielle `ROS2` et de ses différentes fonctionnalités et concepts.
+
+- Tests manuels de création de packages `ROS2` simples pour comprendre le fonctionnement, les mécanismes de publications/souscription et les contraintes d'exécution rélles.
+
+- Création de configurations `Docker` pour un lancement simplifié et conteneurisé des packages.
+
+- Limitation des ressources `CPU` et `mémoires` utilisées par les conteneurs `Docker` pour définir un environnement de simulation contraints.
+
+- Recherche de différents modèles d’`IA` possibles pour une architecture avec des `graphes` et des `séries temporelles`. Nous avons identifié deux pistes : (1) Enrichir les nœuds du graph avec des caractéristiques temporelles (**statistiques, tendances**) en utilisant un modèle comme le GNN (2) Utiliser des architectures spatio-temporelles comme **T-GNN** ou **ST-GNN** capables d’apprendre les dépendances entre nœuds et l’évolution temporelle globale.
+
 - Écriture des logs dans la `RAM` durant l’exécution, puis sauvegarde dans des fichiers situés dans un volume spécifique à la fin de l’exécution du programme (attention à ne pas trop en demander sous peine de perte de performances)
+
 - Création de l’architecture du `DSL` avec `Langium`
-  - Création du package à partir du modèle passé en paramètre (fichier `.rosaml`)
-  - Création des différents nœuds
-  - Création d’un fichier `launch` pour lancer tous les nœuds
-  - Création du `Dockerfile` et du morceau de code à inclure dans le `docker-compose`
-  - Création du graphe au format JSON à partir du modèle (en cours d’amélioration)
+    - Définission d'un `langage` permettant à l’utilisateur de spécifier le comportement de chaque nœud ROS2 avec ses **paramètres** et **états initiaux**, ses **déclencheurs** d’action, ses **actions** et ses **contraintes temporelles**.
+    - Génération de `package conteneurisé` à partir du modèle décrit par l'utilisateur passé en paramètre (fichier `.rosaml`)
+    - Génération des différents `nœuds ROS2` dans un package avec ses composants (*services, actions, publishers, subscribers*) qui respectent les **contraintes** définis par l’**utilisateur**.
+    - Création d’un fichier `launch` pour lancer tous les nœuds
+    - Création du `Dockerfile` et du morceau de code à inclure dans le `docker-compose`
+
+- Création du graphe au format JSON à partir du modèle (en cours d’amélioration)
 - Création d’un microservice pour lire les fichiers de logs et les enregistrer dans la base de données
 
 ## Descriptif des deux livrables intermédiaires et du plan d’avancement
