@@ -29,11 +29,11 @@ Les caractéristiques temporelles extraites devront être informatives et réinj
 - Écriture des logs dans la `RAM` durant l’exécution, puis sauvegarde dans des fichiers situés dans un volume spécifique à la fin de l’exécution du programme (attention à ne pas trop en demander sous peine de perte de performances)
 
 - Création de l’architecture du `DSL` avec `Langium`
-    - Définission d'un `langage` permettant à l’utilisateur de spécifier le comportement de chaque nœud ROS2 avec ses **paramètres** et **états initiaux**, ses **déclencheurs** d’action, ses **actions** et ses **contraintes temporelles**.
+    - Définission d'un `langage` permettant à l’utilisateur de spécifier le comportement de chaque nœud ROS2 avec ses **paramètres** et **états initiaux**, ses **déclencheurs** d’action (réception de message, temps écoulé, changement d'état ...), ses **actions** (publication, appel de service, changement d'état ...) et ses **contraintes temporelles** (temps d'exécution, délais, jitter ...).
     - Génération de `package conteneurisé` à partir du modèle décrit par l'utilisateur passé en paramètre (fichier `.rosaml`)
     - Génération des différents `nœuds ROS2` dans un package avec ses composants (*services, actions, publishers, subscribers*) qui respectent les **contraintes** définis par l’**utilisateur**.
-    - Création d’un fichier `launch` pour lancer tous les nœuds
-    - Création du `Dockerfile` et du morceau de code à inclure dans le `docker-compose`
+    - Génération d’un fichier `launch` pour lancer l'ensemble des nœuds
+    - Génération d'un `Dockerfile` et d'unce configuration partielle à intégrer dans le `docker-compose`
 
 - Création du graphe au format JSON à partir du modèle (en cours d’amélioration)
 - Création d’un microservice pour lire les fichiers de logs et les enregistrer dans la base de données
