@@ -1,4 +1,4 @@
-# temporal-model-hybridization
+# Temporal-model-hybridization
 
 ## Environment
 
