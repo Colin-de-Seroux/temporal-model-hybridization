@@ -1,5 +1,22 @@
 # Temporal-model-hybridization
 
+##  DSL
+
+```bash
+npm install
+```
+To execute the DSL
+```bash
+npm run langium:generate
+
+npm run build
+
+npm run cli ..\ros_packages\your_file.rosaml
+```
+Exemple of **.rosaml** files can be found in `ros_packages`
+
+Generated packages can be found in `ros_packages\generated`
+
 ## Environment
 
 Copy `.env.example` in `.env`.
