@@ -3,11 +3,18 @@ import {
     ActivationPattern,
     Behavior,
     isActionGoalReceived,
+    isCallService,
+    isGetParam,
+    isLogMessage,
     isMessageReceived,
     isParamChanged,
+    isSendActionGoal,
+    isSendMessage,
     isServiceRequest,
+    isSetParam,
     isStateChanged,
     isTimerElapsed,
+    isUpdateState,
     MessageReceived,
     Model,
     Node,
@@ -108,6 +115,8 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.node import Node`);
     nodeBlock.appendNewLine();
+    nodeBlock.append(`from rclpy.action import ActionServer, ActionClient`); 
+    nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.executors import ExternalShutdownException`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`from std_msgs.msg import String, Int32, Float32, Bool, Header`);
@@ -159,25 +168,35 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 
 
 function generateActionCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode]  {
-    switch (action.$type) {
-        case 'SendMessage':
-            return generateSendMessageCode(action);
-        case 'LogMessage':
-            return generateLogMessageCode(action);
-        case 'CallService':
-            return generateCallServiceCode(action);
-        case 'SetParam':
-            return generateSetParamCode(action);
-        case 'GetParam':
-            return generateGetParamCode(action);
-        case 'UpdateState':
-            return generateUpdateStateCode(action);
-        default:
-            const init = new CompositeGeneratorNode();
-            const exec = new CompositeGeneratorNode();
-            exec.append(`        # Action non gérée`);
-            return [init, exec];
+    if (isSendMessage(action)) {
+        return generateSendMessageCode(action);
     }
+    else if (isLogMessage(action)) {
+        return generateLogMessageCode(action);
+    }
+    else if (isCallService(action)) {
+        return generateCallServiceCode(action); 
+    }
+    else if(isSetParam(action)) {
+        return generateSetParamCode(action);
+    }
+    else if (isGetParam(action)) {
+        return generateGetParamCode(action);
+    }
+    else if (isUpdateState(action)) {
+        return generateUpdateStateCode(action);
+    }
+    else if (isSendActionGoal(action)) {
+        return generateSendActionGoalCode(action);
+    }
+    else {
+        const init = new CompositeGeneratorNode();
+        const exec = new CompositeGeneratorNode();
+        exec.append(`        #  Action non gérée`);
+        exec.appendNewLine();
+        return [init, exec];
+    }
+    
 }
 
 function generateSendMessageCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode]  {
@@ -278,6 +297,25 @@ function generateUpdateStateCode(action: any): [CompositeGeneratorNode, Composit
     return [init, exec];
 }
 
+function generateSendActionGoalCode(action: any): [CompositeGeneratorNode, CompositeGeneratorNode] {
+    const init = new CompositeGeneratorNode();
+    const exec = new CompositeGeneratorNode();
+
+    const actionName = action.action;
+    const goal = action.goal.replace(/"/g, '\\"'); 
+
+    init.append(`        self.action_client_${actionName} = ActionClient(self, ${actionName}, '${actionName}')`);
+    init.appendNewLine();
+
+    exec.append(`        goal_msg = '${goal}'`); 
+    exec.appendNewLine();
+    exec.append(`        self.action_client_${actionName}.send_goal_async(goal_msg)`);
+    exec.appendNewLine();
+
+    return [init, exec];
+}
+
+
 function compileParameter(param: Parameter): CompositeGeneratorNode {
     const nodeBlock = new CompositeGeneratorNode();
     const defaultVal = generateValueCode(param.defaultValue )?? 'None';
@@ -358,10 +396,12 @@ function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, Composite
     methodCode.append(`    def ${methodName}(self):`);
     methodCode.appendNewLine();
 
-    const [actionInit, actionExec] = generateActionCode(behavior.action);
-    initCode.append(actionInit);
-    methodCode.append(actionExec);
-    methodCode.appendNewLine();
+    for (const action of behavior.action) {
+        const [actionInit, actionExec] = generateActionCode(action);
+        initCode.append(actionInit);
+        methodCode.append(actionExec);
+        methodCode.appendNewLine();
+    }
 
     if (isTimerElapsed(triger)) {
         compileTimerTrigger(triger, methodCode,methodName);   
@@ -373,7 +413,7 @@ function compileBehavior(behavior: Behavior): [CompositeGeneratorNode, Composite
         compileServiceTrigger(triger, methodCode, methodName);
     }
     if (isActionGoalReceived(triger)) {
-        compileActionTrigger(triger, methodCode, methodName);
+        compileActionTrigger(triger, methodCode,initCode, methodName);
     }
     if (isParamChanged(triger)) {
         compileParamTrigger(triger, methodCode, methodName);
@@ -441,10 +481,26 @@ function compileServiceTrigger(triger: ServiceRequest, nodeBlock: CompositeGener
     nodeBlock.appendNewLine();
 }
 
-function compileActionTrigger(triger: ActionGoalReceived, nodeBlock: CompositeGeneratorNode,methodName: string): void {
+function compileActionTrigger(triger: ActionGoalReceived, nodeBlock: CompositeGeneratorNode,initBlock: CompositeGeneratorNode,methodName: string): void {
     const actionName = triger.action;
+     initBlock.appendNewLine();
+    initBlock.append(`        self._${actionName}_server = ActionServer(`);
+    initBlock.appendNewLine();
+    initBlock.append(`            self,`);
+    initBlock.appendNewLine();
+    initBlock.append(`            YOUR_ACTION_TYPE,  # TODO: Remplacer par le bon type`);
+    initBlock.appendNewLine();
+    initBlock.append(`            '${actionName}',`);
+    initBlock.appendNewLine();
+    initBlock.append(`            self.${actionName}_callback`);
+    initBlock.appendNewLine();
+    initBlock.append(`        )`);
+    initBlock.appendNewLine();
+
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${actionName}_callback(self, goal_handle):`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        goal= goal_handle.request`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
@@ -452,8 +508,12 @@ function compileActionTrigger(triger: ActionGoalReceived, nodeBlock: CompositeGe
     nodeBlock.appendNewLine();
     nodeBlock.append(`        result = ... # TODO: définir le type et la réponse`);
     nodeBlock.appendNewLine();
+    nodeBlock.append(`        result.success = True`)
+    nodeBlock.appendNewLine();
     nodeBlock.append(`        return result`);
     nodeBlock.appendNewLine();
+
+   
 }
 
 function compileParamTrigger(triger: ParamChanged, nodeBlock: CompositeGeneratorNode,methodName: string): void {
@@ -479,189 +539,3 @@ function compileStateTrigger(triger: StateChanged, nodeBlock: CompositeGenerator
     nodeBlock.append(`            self.${methodName}()`);
     nodeBlock.appendNewLine();
 }
-
-
-
-/*
-function compileLogger(level: string, msg: string): CompositeGeneratorNode {
-    const node = new CompositeGeneratorNode();
-    node.append(`        self.get_logger().${level}('${msg}')`);
-    return node;
-}
-
-function compilePublisher(
-    pub: Publisher,
-    types: Set<string>
-): CompositeGeneratorNode {
-    const node = new CompositeGeneratorNode();
-    const type = resolveMessageType(pub.msgType, pub.msg);
-    types.add(type);
-    node.append(
-        `        self.publisher_${pub.topicName} = self.create_publisher(${type}, '${pub.topicName}', 10)`
-    );
-    return node;
-}
-
-function compileSubscriber(
-    sub: Subscriber,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = resolveMessageType(sub.msgType, sub.msg);
-    types.add(type);
-
-    init.append(
-        `        self.subscription_${sub.topicName} = self.create_subscription(`
-    );
-    init.append(
-        `${type}, '${sub.topicName}', self.listener_callback_${sub.topicName}, 10)`
-    );
-    init.appendNewLine();
-
-    method.append(`    def listener_callback_${sub.topicName}(self, msg):`);
-    method.appendNewLine();
-    method.append(`        self.get_logger().info('${sub.msg}')`);
-    method.appendNewLine();
-
-    return [init, method];
-}
-
-function compileService(
-    service: Service,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = service.srvType?.split('.').at(-1) ?? 'DefaultServiceType';
-    types.add(type);
-
-    init.append(
-        `        self.service_${service.serviceName} = self.create_service(`
-    );
-    init.append(
-        `${type}, '${service.serviceName}', self.handle_${service.serviceName})`
-    );
-    init.appendNewLine();
-
-    method.append(
-        `    def handle_${service.serviceName}(self, request, response):`
-    );
-    method.appendNewLine();
-    method.append(`        # TODO: Implement service logic`);
-    method.appendNewLine();
-    method.append(`        return response`);
-    method.appendNewLine();
-
-    return [init, method];
-}
-
-function compileAction(
-    action: Action,
-    types: Set<string>
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-    const type = action.actionType?.split('.').at(-1) ?? 'DefaultActionType';
-    types.add(type);
-    init.append(`        # Action server for ${action.actionName}`);
-    init.appendNewLine();
-    init.append(
-        `        self.action_server_${action.actionName} = rclpy.action.ActionServer(`
-    );
-    init.appendNewLine();
-    init.append(
-        `            self, ${type}, '${action.actionName}', self.execute_${action.actionName})`
-    );
-    init.appendNewLine();
-
-    method.append(`    def execute_${action.actionName}(self, goal_handle):`);
-    method.appendNewLine();
-    method.append(
-        `        self.get_logger().info('Executing goal: ${action.goal}')`
-    );
-    method.appendNewLine();
-    method.append(`        # TODO: Add feedback publishing`);
-    method.appendNewLine();
-    method.append(`        goal_handle.succeed()`);
-    method.appendNewLine();
-    method.append(`        result = ${type}.Result()`);
-    method.appendNewLine();
-    method.append(`        result.result = "${action.result}"`);
-    method.appendNewLine();
-    method.append(`        return result`);
-    method.appendNewLine();
-
-    return [init, method];
-}
-
-function compileCallback(
-    callback: Callback
-): [CompositeGeneratorNode, CompositeGeneratorNode] {
-    const init = new CompositeGeneratorNode();
-    const method = new CompositeGeneratorNode();
-
-    const callbackName = callback.name;
-    const kind = callback.kind;
-    const target = callback.target ?? callbackName;
-    const execTime = callback.expectedExecTime;
-
-    if (kind === 'timer') {
-        init.append(`        self.timer_${callbackName} = self.create_timer(`);
-        init.append(`${Number(execTime) / 1000}, self.callback_${callbackName})`);
-        init.appendNewLine();
-
-        method.append(`    @measure_execution_time()`);
-        method.appendNewLine();
-        method.append(`    def callback_${callbackName}(self):`);
-        method.appendNewLine();
-        method.append(`        self.get_logger().info('Timer callback ${callbackName} triggered')`);
-        method.appendNewLine();
-
-    } else if (kind === 'subscriber') {
-        init.append(`        self.subscription_${target} = self.create_subscription(`);
-        init.append(`String, '${target}', self.callback_${callbackName}, 10)`);
-        init.appendNewLine();
-
-        method.append(`    @measure_execution_time()`);
-        method.appendNewLine();
-        method.append(`    def callback_${callbackName}(self, msg):`);
-        method.appendNewLine();
-        method.append(`        self.get_logger().info('Subscriber callback ${callbackName} received: ' + str(msg.data))`);
-        method.appendNewLine();
-
-    } else if (kind === 'service') {
-        init.append(`        self.service_${target} = self.create_service(`);
-        init.append(`Empty, '${target}', self.callback_${callbackName})`);
-        init.appendNewLine();
-
-        method.append(`    @measure_execution_time()`);
-        method.appendNewLine();
-        method.append(`    def callback_${callbackName}(self, request, response):`);
-        method.appendNewLine();
-        method.append(`        self.get_logger().info('Service callback ${callbackName} triggered')`);
-        method.appendNewLine();
-        method.append(`        return response`);
-        method.appendNewLine();
-
-    } else if (kind === 'action') {
-        init.append(`        self.action_server_${target} = rclpy.action.ActionServer(self, Empty, '${target}', self.callback_${callbackName})`);
-        init.appendNewLine();
-
-        method.append(`    @measure_execution_time()`);
-        method.appendNewLine();
-        method.append(`    def callback_${callbackName}(self, goal_handle):`);
-        method.appendNewLine();
-        method.append(`        self.get_logger().info('Action callback ${callbackName} executing')`);
-        method.appendNewLine();
-        method.append(`        goal_handle.succeed()`);
-        method.appendNewLine();
-        method.append(`        result = Empty.Result()`); 
-        method.appendNewLine();
-        method.append(`        return result`);
-        method.appendNewLine();
-    }
-
-    return [init, method];
-}
-*/
