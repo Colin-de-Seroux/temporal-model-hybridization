@@ -30,6 +30,28 @@ export const generateAction = async (
     );
 };
 
+export const generateAllAction = async (
+    opts: GenerateOptions & { dir?: string }
+): Promise<void> => {
+    const ros_configs = path.resolve(__dirname, '..', '..', '..','ros_configs');
+
+    const files = await fs.readdir(ros_configs);
+    const rosamlFiles = files.filter(f => f.endsWith('.rosaml'));
+
+    if (rosamlFiles.length === 0) {
+        console.log(chalk.yellow(`⚠️ No .rosaml files found in ${ros_configs}`));
+        return;
+    }
+
+    for (const file of rosamlFiles) {
+        const filePath = path.join(ros_configs, file);
+        console.log(chalk.cyan(`\tGenerating: ${filePath}`));
+        await generateAction(filePath, opts);
+    }
+
+    console.log(chalk.green(`✅ All .rosaml files in ${ros_configs} processed.`));
+};
+
 export type GenerateOptions = {
     destination?: string;
 };
@@ -43,15 +65,25 @@ export default function (): void {
     program
         .command('generate')
         .argument(
-            '<file>',
+            '[file]',
             `source file (possible file extensions: ${fileExtensions})`
         )
+        .option('--all', 'generate all .rosaml files in a directory')
         .option(
             '-d, --destination <dir>',
             'destination directory of generating'
         )
         .description('generates ROS 2 code and package')
-        .action(generateAction);
+        .action(async (file: string | undefined, opts: any) => {
+            if (opts.all) {
+                await generateAllAction(opts);
+            } else if (file) {
+                await generateAction(file, opts);
+            } else {
+                console.error(chalk.red('❌ Please provide a file or use --all.'));
+                process.exit(1);
+            }
+        });
 
     program.parse(process.argv);
 }

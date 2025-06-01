@@ -1,0 +1,24 @@
+services:
+  publisher_system:
+    image: publisher_system
+    build:
+      context: ./ros2/src/publisher_system
+      dockerfile: Dockerfile
+    container_name: publisher_system
+    environment:
+      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
+      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
+      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
+      - ROS_HOME=/ros2_ws/.ros
+    volumes:
+      - ./ros2/src/publisher_system/Logs:/ros_logs_backup
+    tmpfs:
+      - /ros2_ws/.ros/log # To RAM
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 200M
+        reservations:
+          cpus: "1"
+          memory: 200M

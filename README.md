@@ -3,6 +3,7 @@
 ##  DSL
 
 ```bash
+cd ros_aml
 npm install
 ```
 To execute the DSL

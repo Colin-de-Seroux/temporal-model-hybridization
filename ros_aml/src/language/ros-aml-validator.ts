@@ -21,8 +21,8 @@ export class RosAmlValidator {
     checkPersonStartsWithCapital(node: Node, accept: ValidationAcceptor): void {
         if (node.name) {
             const firstChar = node.name.substring(0, 1);
-            if (firstChar.toLowerCase() !== firstChar) {
-                accept('warning', 'Node name should start with a minuscule.', {
+            if (firstChar.toUpperCase() !== firstChar) {
+                accept('warning', 'Node name should start with an uppercase.', {
                     node: node,
                     property: 'name',
                 });

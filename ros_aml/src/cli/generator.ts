@@ -123,6 +123,8 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from ${pkgName}.timer_execution import measure_execution_time`);
     nodeBlock.appendNewLine();
+    nodeBlock.append(`import json`);
+    nodeBlock.appendNewLine();
     nodeBlock.appendNewLine();
 
 
@@ -242,7 +244,7 @@ function generateCallServiceCode(action: any): [CompositeGeneratorNode, Composit
         `        while not self.client_${srv}.wait_for_service(timeout_sec=1.0):`,
         `            self.get_logger().warn('Service not available, waiting...')`,
         `        req = ServiceType.Request()`,
-        `        req.data = ${req}`,
+        `        req.data = json.dump(${req})`,
         `        future = self.client_${srv}.call_async(req)`,
         `        rclpy.spin_until_future_complete(self, future)`,
         `        if future.result() is not None:`,
