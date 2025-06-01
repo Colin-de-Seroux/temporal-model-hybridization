@@ -18,7 +18,7 @@ class PubSubNode(Node):
         self.publisher_heartbeat_topic = self.create_publisher(String, 'heartbeat_topic', 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_messageReceived_sensor_data(self):
         self.get_logger().info("Received sensor data")
 
@@ -28,7 +28,7 @@ class PubSubNode(Node):
     def sensor_data_callback(self, msg):
         self.on_messageReceived_sensor_data()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_heartbeat(self):
         self.get_logger().debug("Heartbeat timer elapsed")
 
@@ -38,7 +38,7 @@ class PubSubNode(Node):
     def heartbeat_callback(self):
         self.on_timerElapsed_heartbeat()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_paramChanged_use_feature(self):
         self.get_logger().info("Parameter use_feature changed")
 
@@ -48,7 +48,7 @@ class PubSubNode(Node):
             if changed_param.name == 'use_feature':
                 self.on_paramChanged_use_feature()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_stateChanged_system_mode(self):
         self.get_logger().info("System mode changed")
 

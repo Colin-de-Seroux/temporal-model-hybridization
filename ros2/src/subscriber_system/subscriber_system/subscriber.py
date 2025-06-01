@@ -15,7 +15,7 @@ class SubscriberNode(Node):
         self.subscription_data_topic = self.create_subscription(String, 'data_topic', self.data_topic_callback, 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_messageReceived_data_topic(self):
         self.get_logger().info("Message received on data_topic")
 

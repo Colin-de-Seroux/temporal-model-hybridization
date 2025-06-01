@@ -14,7 +14,7 @@ class PublisherNode(Node):
         self.publisher_hello_topic = self.create_publisher(String, 'hello_topic', 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_publish_timer(self):
         self.publisher_hello_topic.publish(String(data='hello'))
 

@@ -14,7 +14,7 @@ class SubscriberNode(Node):
         self.subscription_hello_topic = self.create_subscription(String, 'hello_topic', self.hello_topic_callback, 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_messageReceived_hello_topic(self):
         self.get_logger().info("I heard: hello")
 

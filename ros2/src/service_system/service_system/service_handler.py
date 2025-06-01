@@ -17,7 +17,7 @@ class ServiceHandlerNode(Node):
         self.client_check_battery = self.create_client(ServiceType, 'check_battery')
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_serviceRequest_toggle_led(self):
         self.get_logger().info("Received toggle request")
 
@@ -32,7 +32,7 @@ class ServiceHandlerNode(Node):
         response.message = "Traitement lancé"
         return response
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_blink_timer(self):
         self.get_logger().debug("Checking battery status")
 
@@ -51,7 +51,7 @@ class ServiceHandlerNode(Node):
     def blink_timer_callback(self):
         self.on_timerElapsed_blink_timer()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_paramChanged_use_led(self):
         self.get_logger().info("Parameter 'use_led' changed")
 

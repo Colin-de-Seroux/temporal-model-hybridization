@@ -16,7 +16,7 @@ class SensorNode(Node):
         self.publisher_sensorData = self.create_publisher(String, 'sensorData', 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_readTimer(self):
         self.publisher_sensorData.publish(String(data='temperature_reading'))
 
@@ -24,7 +24,7 @@ class SensorNode(Node):
     def readTimer_callback(self):
         self.on_timerElapsed_readTimer()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_paramChanged_samplingRate(self):
         self.get_logger().info("Sampling rate changed")
 

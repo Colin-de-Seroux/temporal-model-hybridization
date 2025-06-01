@@ -14,7 +14,7 @@ class ActionClientNode(Node):
         self.action_client_sendGoalAction = ActionClient(self, sendGoalAction, 'sendGoalAction')
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_periodicTimer(self):
         goal_msg = 'start'
         self.action_client_sendGoalAction.send_goal_async(goal_msg)

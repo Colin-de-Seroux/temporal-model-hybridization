@@ -20,7 +20,7 @@ class ActionServerNode(Node):
         )
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_actionGoalReceived_sendGoalAction(self):
         self.get_logger().info("Action goal received")
 

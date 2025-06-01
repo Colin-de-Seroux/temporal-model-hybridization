@@ -16,7 +16,7 @@ class ActuatorNode(Node):
         self.subscription_processedData = self.create_subscription(String, 'processedData', self.processedData_callback, 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_messageReceived_processedData(self):
         self.set_parameters([rclpy.parameter.Parameter('actuatorEnabled', value='true')])
 
@@ -24,7 +24,7 @@ class ActuatorNode(Node):
     def processedData_callback(self, msg):
         self.on_messageReceived_processedData()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_stateChanged_actuatorStatus(self):
         self.get_logger().debug("Actuator status updated")
 

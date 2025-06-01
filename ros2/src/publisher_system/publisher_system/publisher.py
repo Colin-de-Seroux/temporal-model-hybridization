@@ -16,7 +16,7 @@ class PublisherNode(Node):
         self.publisher_data_topic = self.create_publisher(String, 'data_topic', 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_timerElapsed_pub_timer(self):
         self.publisher_data_topic.publish(String(data='Hello from publisher'))
 

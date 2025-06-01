@@ -17,7 +17,7 @@ class ProcessingNode(Node):
         self.subscription_sensorData = self.create_subscription(String, 'sensorData', self.sensorData_callback, 10)
 
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_messageReceived_sensorData(self):
         while not self.client_dataProcessingService.wait_for_service(timeout_sec=1.0):
             self.get_logger().warn('Service not available, waiting...')
@@ -34,7 +34,7 @@ class ProcessingNode(Node):
     def sensorData_callback(self, msg):
         self.on_messageReceived_sensorData()
 
-    @measure_execution_time()
+    @measure_execution_time
     def on_serviceRequest_dataProcessingService(self):
         self.processState = 'processing'
 
