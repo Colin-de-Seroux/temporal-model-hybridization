@@ -26,6 +26,7 @@
         "cli:info": "node ./bin/cli",
         "cli": "node ./bin/cli generate --destination ../ros2/src/",
         "cli:all": "node ./bin/cli generate --all --destination ../ros2/src/",
+        "all": "npm run langium:generate && npm run build && npm run cli:all",
         "format": "prettier --write ."
     },
     "dependencies": {

@@ -6,17 +6,33 @@
 cd ros_aml
 npm install
 ```
-To execute the DSL
+Make 1. and 2. in one command
+```bash
+npm run all 
+```
+Exemple of **.rosaml** files can be found in `ros_configs`
+
+Generated packages can be found in `ros2\src`
+
+**OR :**
+
+1. To generate ast & build the DSL
 ```bash
 npm run langium:generate
 
 npm run build
+```
+2. To generate all `.rosaml` config files from `ros_configs`
 
+```bash
+npm run cli:all
+```
+
+To generate one file 
+```bash
 npm run cli ..\ros_packages\your_file.rosaml
 ```
-Exemple of **.rosaml** files can be found in `ros_packages`
 
-Generated packages can be found in `ros_packages\generated`
 
 ## Environment
 
