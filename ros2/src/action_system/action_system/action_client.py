@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer, ActionClient
+import time
 from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from action_system.timer_execution import measure_execution_time
@@ -11,14 +11,11 @@ class ActionClientNode(Node):
         super().__init__('actionclient')
         self.periodicTimer_timer = self.create_timer(1.000, self.periodicTimer_callback)
 
-        self.action_client_sendGoalAction = ActionClient(self, sendGoalAction, 'sendGoalAction')
 
 
     @measure_execution_time
     def on_timerElapsed_periodicTimer(self):
-        goal_msg = 'start'
-        self.action_client_sendGoalAction.send_goal_async(goal_msg)
-
+        time.sleep(0.003) 
 
     def periodicTimer_callback(self):
         self.on_timerElapsed_periodicTimer()

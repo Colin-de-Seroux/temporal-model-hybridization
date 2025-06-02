@@ -7,13 +7,6 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='action_system',
-            executable='action_server',
-            name='ActionServerNode',
-            output='screen',
-            arguments=['--ros-args', '--log-level', 'INFO'],
-        ),
-        Node(
-            package='action_system',
             executable='action_client',
             name='ActionClientNode',
             output='screen',

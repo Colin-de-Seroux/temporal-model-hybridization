@@ -12,17 +12,13 @@ timer heartbeat period 1000.0 ms
 when messageReceived sensor_data do
     log info "Received sensor data"
     updateState system_mode 'active'
-    expectedTime 1.0 ms
 
 when timerElapsed heartbeat do
     log debug "Heartbeat timer elapsed"
     sendMessage heartbeat_topic "ping" qos reliable
-    expectedTime 0.5 ms
 
 when paramChanged use_feature do
     log info "Parameter use_feature changed"
-    expectedTime 0.2 ms
 
 when stateChanged system_mode do
     log info "System mode changed"
-    expectedTime 0.3 ms
