@@ -5,7 +5,7 @@ expectedExecTime 2.5 ms
 timer blink_timer period 1000.0 ms
 
 when timerElapsed blink_timer do
-    log debug "Checking battery status"
-    callService check_battery "{'threshold': 20}"  0.5 ms
+    log debug "Checking service status"
+    callService serviceCheck  0.5 ms
 
 

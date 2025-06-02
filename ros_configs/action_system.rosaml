@@ -3,4 +3,4 @@ node ActionClient
   timer periodicTimer period 1000 ms
   when timerElapsed periodicTimer
     do
-      sendActionGoal sendGoalAction "start" 3.0 ms
+      sendActionGoal sendGoalAction 3.0 ms

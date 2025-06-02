@@ -15,7 +15,7 @@ class ServiceHandlerNode(Node):
 
     @measure_execution_time
     def on_timerElapsed_blink_timer(self):
-        self.get_logger().debug("Checking battery status")
+        self.get_logger().debug("Checking service status")
 
         time.sleep(0.0005) 
 
