@@ -7,14 +7,15 @@ node Sensor
     param samplingRate default 10
     state sensorStatus initial "idle"
     timer readTimer period 100.0 ms
-    when timerElapsed readTimer do sendMessage sensorData "temperature_reading" qos reliable expectedTime 4.5 ms
+    when timerElapsed readTimer do sendMessage sensorData "temperature_reading" qos reliable 
     when paramChanged samplingRate do log info "Sampling rate changed"
     
 node Processing
     expectedExecTime 10.0 ms
     param processingMode default "normal"
     state processState initial "waiting"
-    when messageReceived sensorData do callService dataProcessingService "{'data': 'temperature_reading'}" expectedTime 8.0 ms
+    when messageReceived sensorData do callService dataProcessingService "{'data': 'temperature_reading'}" 0.5 ms
+
     when serviceRequest dataProcessingService do updateState processState "processing"
     
 node Actuator

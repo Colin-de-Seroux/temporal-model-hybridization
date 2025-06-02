@@ -2,6 +2,7 @@ import {
     ActionGoalReceived,
     ActivationPattern,
     Behavior,
+    CallService,
     isActionGoalReceived,
     isCallService,
     isGetParam,
@@ -20,6 +21,7 @@ import {
     Node,
     ParamChanged,
     Parameter,
+    SendActionGoal,
     ServiceRequest,
     State,
     StateChanged,
@@ -120,7 +122,7 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.node import Node`);
     nodeBlock.appendNewLine();
-    nodeBlock.append(`from rclpy.action import ActionServer, ActionClient`);
+    nodeBlock.append(`import time`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`from rclpy.executors import ExternalShutdownException`);
     nodeBlock.appendNewLine();
@@ -239,12 +241,12 @@ function generateLogMessageCode(
 }
 
 function generateCallServiceCode(
-    action: any
+    action: CallService
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
 
-    const srv = action.service;
+    /*const srv = action.service;
     const req = action.request.replace(/"/g, '\\"');
 
     init.append(
@@ -267,7 +269,12 @@ function generateCallServiceCode(
     for (const line of callServiceLines) {
         exec.append(line);
         exec.appendNewLine();
-    }
+    }*/
+
+    const execTime = action.expectedTime; 
+    exec.append(
+        `        time.sleep(${Number(execTime)/1000}) `
+    );
 
     return [init, exec];
 }
@@ -319,15 +326,14 @@ function generateUpdateStateCode(
 }
 
 function generateSendActionGoalCode(
-    action: any
+    action: SendActionGoal
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
 
-    const actionName = action.action;
-    const goal = action.goal.replace(/"/g, '\\"');
-
-    init.append(
+    /*const actionName = action.action;
+    const goal = action.goal.replace(/"/g, '\\"');*/
+    /*init.append(
         `        self.action_client_${actionName} = ActionClient(self, ${actionName}, '${actionName}')`
     );
     init.appendNewLine();
@@ -337,7 +343,11 @@ function generateSendActionGoalCode(
     exec.append(
         `        self.action_client_${actionName}.send_goal_async(goal_msg)`
     );
-    exec.appendNewLine();
+    exec.appendNewLine();*/
+    const execTime = action.expectedTime; 
+    exec.append(
+        `        time.sleep(${Number(execTime)/1000}) `
+    );
 
     return [init, exec];
 }

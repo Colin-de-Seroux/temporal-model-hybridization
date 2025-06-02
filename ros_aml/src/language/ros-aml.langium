@@ -32,7 +32,7 @@ ActivationPattern:
     'event-driven' source=ID;
 
 Behavior:
-    'when' trigger=Trigger 'do' action+=Action+ ('expectedTime' time=DOUBLE 'ms')?;
+    'when' trigger=Trigger 'do' action+=Action+;
 
 Trigger:
     MessageReceived |
@@ -76,7 +76,7 @@ LogMessage:
     'log' level=LEVEL message=STRING;
 
 CallService:
-    'callService' service=ID request=STRING;
+    'callService' service=ID (request=STRING)? expectedTime=DOUBLE 'ms';
 
 SetParam:
     'setParam' param=ID value=Value;
@@ -88,7 +88,7 @@ UpdateState:
     'updateState' state=ID value=Value;
 
 SendActionGoal:
-    'sendActionGoal' action=ID goal=STRING;
+    'sendActionGoal' action=ID (goal=STRING)? expectedTime=DOUBLE 'ms';
 
 Value:
     intValue=INT | doubleValue=DOUBLE| boolValue=BOOL | stringValue=STRING ;
