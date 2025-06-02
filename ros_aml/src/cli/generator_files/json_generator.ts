@@ -10,9 +10,10 @@ export function generateJsonModel(model: Model): string {
         const jsonNode: any = {};
         jsonNode['name'] = node.name;
         jsonNode['expectedExecTime'] = Number(node.expectedExecTime);
+        jsonNode['timers'] = [];
 
         for (const timer of node.timers) {
-            jsonNode['timer'] = generateTimer(timer);
+            jsonNode['timers'].push(generateTimer(timer));
         }
 
         graph['nodes'].push(jsonNode);
