@@ -53,5 +53,19 @@ function generateTrigger(trigger: Trigger): any {
     const jsonTrigger: any = {};
     jsonTrigger['type'] = trigger.$type;
 
+    if (trigger.$type === 'MessageReceived') {
+        jsonTrigger['value'] = trigger.topic;
+    } else if (trigger.$type === 'TimerElapsed') {
+        jsonTrigger['value'] = trigger.timer;
+    } else if (trigger.$type === 'ServiceRequest') {
+        jsonTrigger['value'] = trigger.service;
+    } else if (trigger.$type === 'ActionGoalReceived') {
+        jsonTrigger['value'] = trigger.action;
+    } else if (trigger.$type === 'ParamChanged') {
+        jsonTrigger['value'] = trigger.param;
+    } else if (trigger.$type === 'StateChanged') {
+        jsonTrigger['value'] = trigger.state;
+    }
+
     return jsonTrigger;
 }
