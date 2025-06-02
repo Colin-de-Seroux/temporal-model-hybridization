@@ -1,0 +1,17 @@
+node ActionServer
+  expectedExecTime 20 ms
+  state currentGoal initial ""
+  
+  when actionGoalReceived sendGoalAction
+    do
+      log info "Action goal received"
+      updateState currentGoal "processing"
+    expectedTime 15 ms
+
+node ActionClient
+  expectedExecTime 10 ms
+  timer periodicTimer period 1000 ms
+  when timerElapsed periodicTimer
+    do
+      sendActionGoal sendGoalAction "start"
+    expectedTime 5 ms

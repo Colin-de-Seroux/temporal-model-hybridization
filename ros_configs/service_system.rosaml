@@ -1,0 +1,22 @@
+node ServiceHandler
+expectedExecTime 2.5 ms
+
+param use_led default 'true'
+state led_state initial 'false'
+
+timer blink_timer period 1000.0 ms
+
+when serviceRequest toggle_led do
+    log info "Received toggle request"
+    updateState led_state 'true'
+    sendMessage led_status "LED toggled" qos reliable
+    expectedTime 1.0 ms
+
+when timerElapsed blink_timer do
+    log debug "Checking battery status"
+    callService check_battery "{'threshold': 20}"
+    expectedTime 1.5 ms
+
+when paramChanged use_led do
+    log info "Parameter 'use_led' changed"
+    expectedTime 0.5 ms

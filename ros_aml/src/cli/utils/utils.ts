@@ -1,4 +1,4 @@
-import { Behavior, Value } from "../../language/generated/ast.js";
+import { Behavior, isActionGoalReceived, isMessageReceived, isParamChanged, isServiceRequest, isStateChanged, isTimerElapsed, Value } from "../../language/generated/ast.js";
 
 export function inferTypeFromMessage(msg: string): string {
     if (/^-?\d+$/.test(msg)) return 'std_msgs.msg.Int32';
@@ -15,12 +15,12 @@ export function resolveMessageType(
 }
 
 export function getBehaviorMethodName(behavior: Behavior): string {
-    if (behavior.trigger.timer) return `on_timerElapsed_${behavior.trigger.timer}`;
-    if (behavior.trigger.topic) return `on_messageReceived_${behavior.trigger.topic}`;
-    if (behavior.trigger.service) return `on_serviceRequest_${behavior.trigger.service}`;
-    if (behavior.trigger.action) return `on_actionGoalReceived_${behavior.trigger.action}`;
-    if (behavior.trigger.param) return `on_paramChanged_${behavior.trigger.param}`;
-    if (behavior.trigger.state) return `on_stateChanged_${behavior.trigger.state}`;
+    if (isTimerElapsed(behavior.trigger)) return `on_timerElapsed_${behavior.trigger.timer}`;
+    if (isMessageReceived(behavior.trigger)) return `on_messageReceived_${behavior.trigger.topic}`;
+    if (isServiceRequest(behavior.trigger)) return `on_serviceRequest_${behavior.trigger.service}`;
+    if (isActionGoalReceived(behavior.trigger)) return `on_actionGoalReceived_${behavior.trigger.action}`;
+    if (isParamChanged(behavior.trigger)) return `on_paramChanged_${behavior.trigger.param}`;
+    if (isStateChanged(behavior.trigger)) return `on_stateChanged_${behavior.trigger.state}`;
     return 'on_unknown_trigger';
 }
 
@@ -34,3 +34,5 @@ export function generateValueCode(value: Value | undefined): string {
 
     return 'None'; 
 }
+
+
