@@ -17,20 +17,19 @@ services:
     networks:
       tmh-net:
         ipv4_address: 172.35.0.2
-
-  service_system:
-    image: service_system
+  pub_and_sub:
+    image: pub_and_sub
     build:
-      context: ./ros2/src/service_system
+      context: ./ros2/src/pub_and_sub
       dockerfile: Dockerfile
-    container_name: service_system
+    container_name: pub_and_sub
     environment:
       - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
       - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
       - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
       - ROS_HOME=/ros2_ws/.ros
     volumes:
-      - ./ros2/src/service_system/Logs:/ros_logs_backup
+      - ./ros2/src/pub_and_sub/Logs:/ros_logs_backup
     tmpfs:
       - /ros2_ws/.ros/log # To RAM
     deploy:
@@ -41,75 +40,7 @@ services:
         reservations:
           cpus: "1"
           memory: 200M
-  action_system:
-    image: action_system
-    build:
-      context: ./ros2/src/action_system
-      dockerfile: Dockerfile
-    container_name: action_system
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/action_system/Logs:/ros_logs_backup
-    tmpfs:
-      - /ros2_ws/.ros/log # To RAM
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
-  publish_subscribe_node:
-    image: publish_subscribe_node
-    build:
-      context: ./ros2/src/publish_subscribe_node
-      dockerfile: Dockerfile
-    container_name: publish_subscribe_node
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/publish_subscribe_node/Logs:/ros_logs_backup
-    tmpfs:
-      - /ros2_ws/.ros/log # To RAM
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
-  hello:
-    image: hello
-    build:
-      context: ./ros2/src/hello
-      dockerfile: Dockerfile
-    container_name: hello
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/hello/Logs:/ros_logs_backup
-    tmpfs:
-      - /ros2_ws/.ros/log # To RAM
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
+  
   # temporal_execution:
   #   image: temporal_execution
   #   build:

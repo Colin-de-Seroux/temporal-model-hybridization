@@ -5,6 +5,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from publish_subscribe_node.timer_execution import measure_execution_time
 import json
+from datetime import datetime
 
 class PubSubNode(Node):
     def __init__(self):
@@ -26,12 +27,16 @@ class PubSubNode(Node):
 
 
     def sensor_data_callback(self, msg):
+        finish_time = time.time()
+        self.get_logger().info("Received at: " + str(finish_time))
         self.on_messageReceived_sensor_data()
 
     @measure_execution_time
     def on_timerElapsed_heartbeat(self):
         self.get_logger().debug("Heartbeat timer elapsed")
 
+        start_time = time.time()
+        self.get_logger().info("Send at: " + str(start_time))
         self.publisher_heartbeat_topic.publish(String(data='ping'))
 
 

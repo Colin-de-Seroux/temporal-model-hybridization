@@ -5,6 +5,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
 import json
+from datetime import datetime
 
 class SensorNode(Node):
     def __init__(self):
@@ -18,6 +19,8 @@ class SensorNode(Node):
 
     @measure_execution_time
     def on_timerElapsed_readTimer(self):
+        start_time = time.time()
+        self.get_logger().info("Send at: " + str(start_time))
         self.publisher_sensorData.publish(String(data='temperature_reading'))
 
 

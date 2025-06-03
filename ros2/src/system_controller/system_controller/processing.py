@@ -5,6 +5,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
 import json
+from datetime import datetime
 
 class ProcessingNode(Node):
     def __init__(self):
@@ -21,6 +22,8 @@ class ProcessingNode(Node):
         time.sleep(0.0005) 
 
     def sensorData_callback(self, msg):
+        finish_time = time.time()
+        self.get_logger().info("Received at: " + str(finish_time))
         self.on_messageReceived_sensorData()
 
     @measure_execution_time

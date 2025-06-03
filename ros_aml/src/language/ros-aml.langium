@@ -59,7 +59,6 @@ ParamChanged:
 
 StateChanged:
     'stateChanged' state=ID;
-
 Action:
     SendMessage | 
     LogMessage | 

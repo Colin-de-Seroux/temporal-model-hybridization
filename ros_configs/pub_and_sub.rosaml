@@ -1,0 +1,15 @@
+pubSubSystem
+logger info
+
+node PubSub
+expectedExecTime 5.0 ms
+timer heartbeat period 1000.0 ms
+
+when messageReceived topic do
+    log info "Received sensor data"
+
+when timerElapsed heartbeat do
+    log debug "Heartbeat timer elapsed"
+    sendMessage topic "ping"
+
+

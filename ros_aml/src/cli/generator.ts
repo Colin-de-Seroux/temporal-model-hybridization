@@ -22,6 +22,7 @@ import {
     ParamChanged,
     Parameter,
     SendActionGoal,
+    SendMessage,
     ServiceRequest,
     State,
     StateChanged,
@@ -131,6 +132,8 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.appendNewLine();
     nodeBlock.append(`import json`);
     nodeBlock.appendNewLine();
+    nodeBlock.append(`from datetime import datetime`);
+    nodeBlock.appendNewLine();
     nodeBlock.appendNewLine();
 
     nodeBlock.append(`class ${node.name}Node(Node):`);
@@ -199,10 +202,10 @@ function generateActionCode(
 }
 
 function generateSendMessageCode(
-    action: any
+    action: SendMessage
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const topic = action.topic;
-    const msg = action.message;
+    const to_send = action.message;
 
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
@@ -213,8 +216,14 @@ function generateSendMessageCode(
     );
     init.appendNewLine();
 
+    const level = 'info';
+    exec.append(`        start_time = time.time()`);
+    exec.appendNewLine();
+    exec.append(`        self.get_logger().${level}("Send at: " + str(start_time))`);
+    exec.appendNewLine();
+
     exec.append(
-        `        self.publisher_${topic}.publish(String(data='${msg}'))`
+        `        self.publisher_${topic}.publish(String(data='${to_send}'))`
     );
     exec.appendNewLine();
 
@@ -508,6 +517,11 @@ function compileTopicTrigger(
 
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
+    nodeBlock.appendNewLine();
+    const level = 'info';
+    nodeBlock.append(`        finish_time = time.time()`);
+    nodeBlock.appendNewLine();
+    nodeBlock.append(`        self.get_logger().${level}("Received at: " + str(finish_time))`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();

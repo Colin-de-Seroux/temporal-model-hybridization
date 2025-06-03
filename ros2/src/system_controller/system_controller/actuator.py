@@ -5,6 +5,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from system_controller.timer_execution import measure_execution_time
 import json
+from datetime import datetime
 
 class ActuatorNode(Node):
     def __init__(self):
@@ -22,6 +23,8 @@ class ActuatorNode(Node):
 
 
     def processedData_callback(self, msg):
+        finish_time = time.time()
+        self.get_logger().info("Received at: " + str(finish_time))
         self.on_messageReceived_processedData()
 
     @measure_execution_time

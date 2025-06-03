@@ -5,6 +5,7 @@ from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String, Int32, Float32, Bool, Header
 from service_system.timer_execution import measure_execution_time
 import json
+from datetime import datetime
 
 class ServiceHandlerNode(Node):
     def __init__(self):
