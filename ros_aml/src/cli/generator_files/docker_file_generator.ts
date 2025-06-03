@@ -1,6 +1,7 @@
 export function generateDockerfile(
     pkgName: string,
-    rosVersion: string = 'jazzy'
+    rosVersion: string = 'jazzy',
+    wantLogging: boolean = true
 ): string {
     return `
 FROM ros:${rosVersion}
@@ -23,7 +24,7 @@ RUN apt-get update && apt-get install -y \\
 WORKDIR /ros2_ws
 
 # Create logs dir
-RUN mkdir -p /ros2_ws/.ros/log
+${wantLogging ? 'RUN mkdir -p /ros2_ws/.ros/log' : ''}
 
 # Copy ${pkgName} package
 COPY . /ros2_ws/src/${pkgName}
@@ -40,7 +41,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 `.trim();
 }
 
-export function generateDockerComposePart(pkgName: string): string {
+export function generateDockerComposePart(pkgName: string, wantLogging: boolean = true): string {
     return `
 services:
   ${pkgName}:
@@ -49,7 +50,7 @@ services:
       context: ./ros2/src/${pkgName}
       dockerfile: Dockerfile
     container_name: ${pkgName}
-    environment:
+${wantLogging ? `    environment:
       - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
       - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
       - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
@@ -57,7 +58,7 @@ services:
     volumes:
       - ./ros2/src/${pkgName}/Logs:/ros_logs_backup
     tmpfs:
-      - /ros2_ws/.ros/log # To RAM
+      - /ros2_ws/.ros/log # To RAM` : ''}
     deploy:
       resources:
         limits:

@@ -16,6 +16,7 @@ import {
     isStateChanged,
     isTimerElapsed,
     isUpdateState,
+    LogMessage,
     MessageReceived,
     Model,
     Node,
@@ -48,11 +49,15 @@ import { generateTimerExecutionPy } from './generator_files/timer_execution_gene
 import { generateLaunchFile } from './generator_files/launch_generation.js';
 import { generateValueCode, getBehaviorMethodName } from './utils/utils.js';
 
+let wantLog = false;
+
 export function generateRosScript(
     model: Model,
     filePath: string,
     destination: string | undefined
 ): string {
+    wantLog = model.logger !== undefined;
+
     const data = extractDestinationAndName(filePath, destination);
     const pkgName = camelCaseToSnakeCase(data.name);
     const rootPath = path.join(data.destination, pkgName);
@@ -94,15 +99,15 @@ export function generateRosScript(
     fs.writeFileSync(path.join(rootPath, 'resource', pkgName), '');
     fs.writeFileSync(
         path.join(rootPath, 'Dockerfile'),
-        generateDockerfile(pkgName)
+        generateDockerfile(pkgName,'jazzy',wantLog)
     );
     fs.writeFileSync(
         path.join(rootPath, 'docker-compose.yml'),
-        generateDockerComposePart(pkgName)
+        generateDockerComposePart(pkgName,wantLog)
     );
     fs.writeFileSync(
         path.join(rootPath, 'entrypoint.sh'),
-        generateEntrypoint(pkgName, model.logger?.level ?? 'info')
+        generateEntrypoint(pkgName, wantLog)
     );
     fs.mkdirSync(path.join(rootPath, 'launch'), { recursive: true });
     fs.writeFileSync(
@@ -226,6 +231,8 @@ function generateSendMessageCode(
     exec.appendNewLine();
     exec.append(`        self.get_logger().${level}("Send at: " + str(start_time))`);
     exec.appendNewLine();
+    
+    
 
     exec.append(
         `        self.publisher_${topic}.publish(String(data='${to_send}'))`
@@ -236,7 +243,7 @@ function generateSendMessageCode(
 }
 
 function generateLogMessageCode(
-    action: any
+    action: LogMessage
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
@@ -528,6 +535,7 @@ function compileTopicTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.get_logger().${level}("Received at: " + str(finish_time))`);
     nodeBlock.appendNewLine();
+    
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
 }

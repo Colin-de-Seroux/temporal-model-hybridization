@@ -1,10 +1,11 @@
 export function generateEntrypoint(
     pkgName: string,
-    loggerLevel: string
+    wantLogging: boolean = true
 ): string {
     return `
 #!/bin/bash
 
+${wantLogging ? `
 LOG_DIR="/ros2_ws/.ros/log"
 BACKUP_DIR="/ros_logs_backup"
 
@@ -18,6 +19,7 @@ function save_logs {
 
 # Set trap to call save_logs on exit
 trap save_logs EXIT
+` : ''}
 
 # Run ROS2 node
 echo "Starting ROS2 node..."
