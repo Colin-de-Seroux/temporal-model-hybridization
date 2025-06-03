@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y \\
 
 WORKDIR /ros2_ws
 
-# Create logs dir
+
+${wantLogging ? '# Create logs dir' : ''}
 ${wantLogging ? 'RUN mkdir -p /ros2_ws/.ros/log' : ''}
 
 # Copy ${pkgName} package

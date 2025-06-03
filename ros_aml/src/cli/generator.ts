@@ -56,7 +56,7 @@ export function generateRosScript(
     filePath: string,
     destination: string | undefined
 ): string {
-    wantLog = model.logger !== undefined;
+    wantLog = model.logger?.training !== undefined;
 
     const data = extractDestinationAndName(filePath, destination);
     const pkgName = camelCaseToSnakeCase(data.name);

@@ -7,7 +7,7 @@ entry Model:
     constraints+=TemporalConstraint*;
 
 LoggerLevel:
-    'logger' level=LEVEL;
+    'logger' level=LEVEL training="training"?;
 
 Node:
     'node' name=ID
