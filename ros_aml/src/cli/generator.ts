@@ -37,6 +37,7 @@ import {
     generateDockerComposePart,
 } from './generator_files/docker_file_generator.js';
 import { generateEntrypoint } from './generator_files/entrypoint_generator.js';
+import { generateJsonModel } from './generator_files/json_generator.js';
 import { generatePackageXml } from './generator_files/xml_generator.js';
 import {
     generateSetupCfg,
@@ -69,6 +70,10 @@ export function generateRosScript(
         );
         fs.writeFileSync(nodeFilePath, toString(fileNode));
     });
+    fs.writeFileSync(
+        path.join(rootPath, 'graph.json'),
+        generateJsonModel(model)
+    );
     fs.writeFileSync(
         path.join(srcPath, 'timer_execution.py'),
         generateTimerExecutionPy()
