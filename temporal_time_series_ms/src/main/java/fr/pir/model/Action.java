@@ -1,19 +1,13 @@
 package fr.pir.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.Data;
@@ -22,29 +16,42 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "nodes", indexes = {
-        @Index(name = "idx_node_name", columnList = "name")
-})
-public class Node {
+@Table(name = "actions")
+public class Action {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String type;
 
     /**
-     * The estimated time of the node in milliseconds by the user.
+     * For pub / sub
      */
-    @Column(nullable = false)
-    private double expectedExecTime;
+    private String topic;
 
-    @OneToMany(mappedBy = "node", fetch = FetchType.LAZY)
-    private Set<Behavior> behaviors = new HashSet<>();
+    /**
+     * For timer / action / service
+     */
+    private double value;
+
+    /***
+     * Execution time for delta of sub-pub / timmer / action / service
+     **/
+
+    /**
+     * Values simulated before training the model.
+     */
+    private double[] executionTimes;
+
+    /**
+     * The estimated time of the node in milliseconds by the AI.
+     */
+    private double estimatedExecTime;
 
     @JsonIgnore
     @ManyToOne
-    private Model model;
+    private Behavior behavior;
 
 }
