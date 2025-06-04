@@ -16,8 +16,17 @@ export function generateJsonModel(model: Model): string {
         jsonNode['expectedExecTime'] = Number(node.expectedExecTime);
         jsonNode['behaviors'] = [];
 
+        const timers = [];
+
+        for (const timer of node.timers) {
+            timers.push({
+                name: timer.name,
+                period: Number(timer.period),
+            });
+        }
+
         for (const behavior of node.behaviors) {
-            jsonNode['behaviors'].push(generateBehavior(behavior));
+            jsonNode['behaviors'].push(generateBehavior(behavior, timers));
         }
 
         graph['nodes'].push(jsonNode);
@@ -28,13 +37,17 @@ export function generateJsonModel(model: Model): string {
     return graphString;
 }
 
-function generateBehavior(behavior: Behavior): any {
+function generateBehavior(
+    behavior: Behavior,
+    timers: { name: string; period: number }[]
+): any {
     let jsonBehavior: any = { actions: [] };
 
     if (behavior.trigger.$type === 'TimerElapsed') {
+        const trigger = behavior.trigger as { timer: string };
         jsonBehavior['actions'].push({
             type: 'timer',
-            value: behavior.trigger.timer,
+            value: timers.find((t) => t.name === trigger.timer)?.period,
         });
     } else if (behavior.trigger.$type === 'MessageReceived') {
         jsonBehavior['actions'].push({
