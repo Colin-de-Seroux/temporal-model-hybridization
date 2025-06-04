@@ -47,7 +47,7 @@ import {
 } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
-import { generateValueCode, getBehaviorMethodName } from './utils/utils.js';
+import { generateValueCode, getBehaviorMethodName, log_with_timer } from './utils/utils.js';
 
 let wantLog = false;
 
@@ -225,12 +225,13 @@ function generateSendMessageCode(
         `        self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)`
     );
     init.appendNewLine();
+    log_with_timer(exec,'start','info','send')
 
-    const level = 'info';
+    /*const level = 'info';
     exec.append(`        start_time = time.time()`);
     exec.appendNewLine();
     exec.append(`        self.get_logger().${level}("Send at: " + str(start_time))`);
-    exec.appendNewLine();
+    exec.appendNewLine();*/
     
     
 
@@ -509,6 +510,8 @@ function compileTimerTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${timerName}_callback(self):`);
     nodeBlock.appendNewLine();
+    log_with_timer(nodeBlock,`${timerName}`,'info','start_callback')
+    nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
 }
@@ -530,11 +533,12 @@ function compileTopicTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
     nodeBlock.appendNewLine();
-    const level = 'info';
+    log_with_timer(nodeBlock,'finish','info','receive')
+    /*const level = 'info';
     nodeBlock.append(`        finish_time = time.time()`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.get_logger().${level}("Received at: " + str(finish_time))`);
-    nodeBlock.appendNewLine();
+    nodeBlock.appendNewLine();*/
     
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();

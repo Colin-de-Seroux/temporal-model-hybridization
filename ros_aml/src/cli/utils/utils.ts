@@ -1,3 +1,4 @@
+import { CompositeGeneratorNode } from "langium/generate";
 import { Behavior, isActionGoalReceived, isMessageReceived, isParamChanged, isServiceRequest, isStateChanged, isTimerElapsed, Value } from "../../language/generated/ast.js";
 
 export function inferTypeFromMessage(msg: string): string {
@@ -33,6 +34,13 @@ export function generateValueCode(value: Value | undefined): string {
     if (value.boolValue !== undefined) return value.boolValue === 'true' ? 'True' : 'False';
 
     return 'None'; 
+}
+
+export function log_with_timer( exec:CompositeGeneratorNode, name_timer:string, level: string='info', action_type:string='send'):void{
+    exec.append(`        ${name_timer}_time = time.time()`);
+    exec.appendNewLine();
+    exec.append(`        self.get_logger().${level}("${action_type} at: " + str(${name_timer}_time))`);
+    exec.appendNewLine();
 }
 
 
