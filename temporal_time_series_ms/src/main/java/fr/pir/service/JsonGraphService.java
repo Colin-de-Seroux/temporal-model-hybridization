@@ -18,6 +18,7 @@ import fr.pir.repository.ActionRepository;
 import fr.pir.repository.BehaviorRepository;
 import fr.pir.repository.ModelRepository;
 import fr.pir.repository.NodeRepository;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -53,13 +54,23 @@ public class JsonGraphService {
             node.setModel(model);
             this.nodeRepository.save(node);
 
+            int index = 0;
+
             for (Behavior behavior : node.getBehaviors()) {
                 behavior.setNode(node);
+                behavior.setBehaviorIndex(index);
                 this.behaviorRepository.save(behavior);
+
+                index++;
+
+                int order = 0;
 
                 for (Action action : behavior.getActions()) {
                     action.setBehavior(behavior);
+                    action.setActionOrder(order);
                     this.actionRepository.save(action);
+
+                    order++;
                 }
             }
         }

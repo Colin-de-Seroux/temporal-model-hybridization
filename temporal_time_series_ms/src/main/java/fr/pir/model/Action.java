@@ -28,6 +28,9 @@ public class Action {
     @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
+    private int actionOrder;
+
     /**
      * For pub / sub
      */
@@ -38,10 +41,11 @@ public class Action {
      */
     private double value;
 
-    /***
+    /**
+     *
      * Execution time for delta of sub-pub / timmer / action / service
-     **/
-
+     *
+     */
     /**
      * Values simulated before training the model.
      */
