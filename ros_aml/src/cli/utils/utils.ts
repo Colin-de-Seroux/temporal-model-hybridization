@@ -36,10 +36,10 @@ export function generateValueCode(value: Value | undefined): string {
     return 'None'; 
 }
 
-export function log_with_timer( exec:CompositeGeneratorNode, name_timer:string, level: string='info', action_type:string='send'):void{
+export function log_with_timer( exec:CompositeGeneratorNode, name_timer:string, level: string='info', action_type:string='pub',b_index:number=0, a_index:number=0):void{
     exec.append(`        ${name_timer}_time = time.time()`);
     exec.appendNewLine();
-    exec.append(`        self.get_logger().${level}("${action_type} at: " + str(${name_timer}_time))`);
+    exec.append(`        self.get_logger().${level}("${action_type}  ${b_index} ${a_index} " + str(${name_timer}_time))`);
     exec.appendNewLine();
 }
 
