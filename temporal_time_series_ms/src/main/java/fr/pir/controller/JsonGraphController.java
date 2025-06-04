@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.phenix333.logger.MyLogger;
-import fr.pir.model.Model;
 import fr.pir.service.JsonGraphService;
 
 import org.springframework.web.bind.annotation.PostMapping;

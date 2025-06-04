@@ -1,5 +1,8 @@
 package fr.pir.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -28,6 +31,9 @@ public class Action {
     @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
+    private int actionOrder;
+
     /**
      * For pub / sub
      */
@@ -38,14 +44,15 @@ public class Action {
      */
     private double value;
 
-    /***
+    /**
+     *
      * Execution time for delta of sub-pub / timmer / action / service
-     **/
-
+     *
+     */
     /**
      * Values simulated before training the model.
      */
-    private double[] executionTimes;
+    private List<Double> executionTimes = new ArrayList<>();
 
     /**
      * The estimated time of the node in milliseconds by the AI.
