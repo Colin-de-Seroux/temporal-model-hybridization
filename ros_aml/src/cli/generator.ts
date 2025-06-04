@@ -47,7 +47,11 @@ import {
 } from './generator_files/setup_generator.js';
 import { generateTimerExecutionPy } from './generator_files/timer_execution_generator.js';
 import { generateLaunchFile } from './generator_files/launch_generation.js';
-import { generateValueCode, getBehaviorMethodName, log_with_timer } from './utils/utils.js';
+import {
+    generateValueCode,
+    getBehaviorMethodName,
+    log_with_timer,
+} from './utils/utils.js';
 
 let wantLog = false;
 
@@ -99,11 +103,11 @@ export function generateRosScript(
     fs.writeFileSync(path.join(rootPath, 'resource', pkgName), '');
     fs.writeFileSync(
         path.join(rootPath, 'Dockerfile'),
-        generateDockerfile(pkgName,'jazzy',wantLog)
+        generateDockerfile(pkgName, 'jazzy', wantLog)
     );
     fs.writeFileSync(
         path.join(rootPath, 'docker-compose.yml'),
-        generateDockerComposePart(pkgName,wantLog)
+        generateDockerComposePart(pkgName, wantLog)
     );
     fs.writeFileSync(
         path.join(rootPath, 'entrypoint.sh'),
@@ -172,7 +176,7 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 
     initBlock.appendNewLine();
     node.behaviors.forEach((behavior, index) => {
-        const [initCode, methodCode] = compileBehavior(behavior,index);
+        const [initCode, methodCode] = compileBehavior(behavior, index);
         initBlock.append(initCode);
         methodsBlock.append(methodCode);
     });
@@ -194,7 +198,7 @@ function generateActionCode(
     } else if (isLogMessage(action)) {
         return generateLogMessageCode(action);
     } else if (isCallService(action)) {
-        return generateCallServiceCode(action,b_index,a_index);
+        return generateCallServiceCode(action, b_index, a_index);
     } else if (isSetParam(action)) {
         return generateSetParamCode(action);
     } else if (isGetParam(action)) {
@@ -202,7 +206,7 @@ function generateActionCode(
     } else if (isUpdateState(action)) {
         return generateUpdateStateCode(action);
     } else if (isSendActionGoal(action)) {
-        return generateSendActionGoalCode(action,b_index,a_index);
+        return generateSendActionGoalCode(action, b_index, a_index);
     } else {
         const init = new CompositeGeneratorNode();
         const exec = new CompositeGeneratorNode();
@@ -228,15 +232,13 @@ function generateSendMessageCode(
         `        self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)`
     );
     init.appendNewLine();
-    log_with_timer(exec,'pub','info','pub',b_index,a_index)
+    log_with_timer(wantLog, exec, 'pub', 'info', 'pub', b_index, a_index);
 
     /*const level = 'info';
     exec.append(`        start_time = time.time()`);
     exec.appendNewLine();
     exec.append(`        self.get_logger().${level}("Send at: " + str(start_time))`);
     exec.appendNewLine();*/
-    
-    
 
     exec.append(
         `        self.publisher_${topic}.publish(String(data='${to_send}'))`
@@ -293,12 +295,26 @@ function generateCallServiceCode(
         exec.appendNewLine();
     }*/
 
-    const execTime = action.expectedTime; 
-    log_with_timer(exec,'start','info','service_start',b_index,a_index)
-    exec.append(
-        `        time.sleep(${Number(execTime)/1000}) `
+    const execTime = action.expectedTime;
+    log_with_timer(
+        wantLog,
+        exec,
+        'start',
+        'info',
+        'service_start',
+        b_index,
+        a_index
     );
-    log_with_timer(exec,'finish','info','service_end',b_index,a_index)
+    exec.append(`        time.sleep(${Number(execTime) / 1000}) `);
+    log_with_timer(
+        wantLog,
+        exec,
+        'finish',
+        'info',
+        'service_end',
+        b_index,
+        a_index
+    );
 
     return [init, exec];
 }
@@ -370,12 +386,26 @@ function generateSendActionGoalCode(
         `        self.action_client_${actionName}.send_goal_async(goal_msg)`
     );
     exec.appendNewLine();*/
-    log_with_timer(exec,'start','info','action_start',b_index,a_index)
-    const execTime = action.expectedTime; 
-    exec.append(
-        `        time.sleep(${Number(execTime)/1000}) `
+    log_with_timer(
+        wantLog,
+        exec,
+        'start',
+        'info',
+        'action_start',
+        b_index,
+        a_index
     );
-    log_with_timer(exec,'end','info','action_end',b_index,a_index)
+    const execTime = action.expectedTime;
+    exec.append(`        time.sleep(${Number(execTime) / 1000}) `);
+    log_with_timer(
+        wantLog,
+        exec,
+        'end',
+        'info',
+        'action_end',
+        b_index,
+        a_index
+    );
 
     return [init, exec];
 }
@@ -466,7 +496,11 @@ function compileBehavior(
     methodCode.append(`    def ${methodName}(self):`);
     methodCode.appendNewLine();
     behavior.action.forEach((action, a_index) => {
-        const [actionInit, actionExec] = generateActionCode(action,b_index,a_index);
+        const [actionInit, actionExec] = generateActionCode(
+            action,
+            b_index,
+            a_index
+        );
         initCode.append(actionInit);
         methodCode.append(actionExec);
         methodCode.appendNewLine();
@@ -521,7 +555,7 @@ function compileTimerTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${timerName}_callback(self):`);
     nodeBlock.appendNewLine();
-    log_with_timer(nodeBlock,`${timerName}`,'info','timer',0,0)
+    log_with_timer(wantLog, nodeBlock, `${timerName}`, 'info', 'timer', 0, 0);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
@@ -544,13 +578,13 @@ function compileTopicTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
     nodeBlock.appendNewLine();
-    log_with_timer(nodeBlock,'finish','info','sub',0,0)
+    log_with_timer(wantLog, nodeBlock, 'finish', 'info', 'sub', 0, 0);
     /*const level = 'info';
     nodeBlock.append(`        finish_time = time.time()`);
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.get_logger().${level}("Received at: " + str(finish_time))`);
     nodeBlock.appendNewLine();*/
-    
+
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
 }
