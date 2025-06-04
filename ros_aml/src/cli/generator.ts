@@ -171,12 +171,11 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     }
 
     initBlock.appendNewLine();
-
-    for (const behavior of node.behaviors) {
-        const [initCode, methodCode] = compileBehavior(behavior);
+    node.behaviors.forEach((behavior, index) => {
+        const [initCode, methodCode] = compileBehavior(behavior,index);
         initBlock.append(initCode);
         methodsBlock.append(methodCode);
-    }
+    });
     nodeBlock.append(initBlock);
     nodeBlock.appendNewLine();
     nodeBlock.append(methodsBlock);
@@ -186,14 +185,16 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
 }
 
 function generateActionCode(
-    action: any
+    action: any,
+    b_index: number,
+    a_index: number
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     if (isSendMessage(action)) {
-        return generateSendMessageCode(action);
+        return generateSendMessageCode(action, b_index, a_index);
     } else if (isLogMessage(action)) {
         return generateLogMessageCode(action);
     } else if (isCallService(action)) {
-        return generateCallServiceCode(action);
+        return generateCallServiceCode(action,b_index,a_index);
     } else if (isSetParam(action)) {
         return generateSetParamCode(action);
     } else if (isGetParam(action)) {
@@ -201,7 +202,7 @@ function generateActionCode(
     } else if (isUpdateState(action)) {
         return generateUpdateStateCode(action);
     } else if (isSendActionGoal(action)) {
-        return generateSendActionGoalCode(action);
+        return generateSendActionGoalCode(action,b_index,a_index);
     } else {
         const init = new CompositeGeneratorNode();
         const exec = new CompositeGeneratorNode();
@@ -212,7 +213,9 @@ function generateActionCode(
 }
 
 function generateSendMessageCode(
-    action: SendMessage
+    action: SendMessage,
+    b_index: number,
+    a_index: number
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const topic = action.topic;
     const to_send = action.message;
@@ -225,7 +228,7 @@ function generateSendMessageCode(
         `        self.publisher_${topic} = self.create_publisher(String, '${topic}', 10)`
     );
     init.appendNewLine();
-    log_with_timer(exec,'start','info','send')
+    log_with_timer(exec,'pub','info','pub',b_index,a_index)
 
     /*const level = 'info';
     exec.append(`        start_time = time.time()`);
@@ -258,7 +261,9 @@ function generateLogMessageCode(
 }
 
 function generateCallServiceCode(
-    action: CallService
+    action: CallService,
+    b_index: number,
+    a_index: number
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
@@ -289,9 +294,11 @@ function generateCallServiceCode(
     }*/
 
     const execTime = action.expectedTime; 
+    log_with_timer(exec,'start','info','service_start',b_index,a_index)
     exec.append(
         `        time.sleep(${Number(execTime)/1000}) `
     );
+    log_with_timer(exec,'finish','info','service_end',b_index,a_index)
 
     return [init, exec];
 }
@@ -343,7 +350,9 @@ function generateUpdateStateCode(
 }
 
 function generateSendActionGoalCode(
-    action: SendActionGoal
+    action: SendActionGoal,
+    b_index: number,
+    a_index: number
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const init = new CompositeGeneratorNode();
     const exec = new CompositeGeneratorNode();
@@ -361,10 +370,12 @@ function generateSendActionGoalCode(
         `        self.action_client_${actionName}.send_goal_async(goal_msg)`
     );
     exec.appendNewLine();*/
+    log_with_timer(exec,'start','info','action_start',b_index,a_index)
     const execTime = action.expectedTime; 
     exec.append(
         `        time.sleep(${Number(execTime)/1000}) `
     );
+    log_with_timer(exec,'end','info','action_end',b_index,a_index)
 
     return [init, exec];
 }
@@ -441,7 +452,8 @@ function compileEventDrivenActivation(source: string): CompositeGeneratorNode {
 }
 
 function compileBehavior(
-    behavior: Behavior
+    behavior: Behavior,
+    b_index: number
 ): [CompositeGeneratorNode, CompositeGeneratorNode] {
     const initCode = new CompositeGeneratorNode();
     const methodCode = new CompositeGeneratorNode();
@@ -453,13 +465,12 @@ function compileBehavior(
     methodCode.appendNewLine();
     methodCode.append(`    def ${methodName}(self):`);
     methodCode.appendNewLine();
-
-    for (const action of behavior.action) {
-        const [actionInit, actionExec] = generateActionCode(action);
+    behavior.action.forEach((action, a_index) => {
+        const [actionInit, actionExec] = generateActionCode(action,b_index,a_index);
         initCode.append(actionInit);
         methodCode.append(actionExec);
         methodCode.appendNewLine();
-    }
+    });
 
     if (isTimerElapsed(triger)) {
         compileTimerTrigger(triger, methodCode, methodName);
@@ -510,7 +521,7 @@ function compileTimerTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${timerName}_callback(self):`);
     nodeBlock.appendNewLine();
-    log_with_timer(nodeBlock,`${timerName}`,'info','start_callback')
+    log_with_timer(nodeBlock,`${timerName}`,'info','timer',0,0)
     nodeBlock.appendNewLine();
     nodeBlock.append(`        self.${methodName}()`);
     nodeBlock.appendNewLine();
@@ -533,7 +544,7 @@ function compileTopicTrigger(
     nodeBlock.appendNewLine();
     nodeBlock.append(`    def ${topicName}_callback(self, msg):`);
     nodeBlock.appendNewLine();
-    log_with_timer(nodeBlock,'finish','info','receive')
+    log_with_timer(nodeBlock,'finish','info','sub',0,0)
     /*const level = 'info';
     nodeBlock.append(`        finish_time = time.time()`);
     nodeBlock.appendNewLine();
