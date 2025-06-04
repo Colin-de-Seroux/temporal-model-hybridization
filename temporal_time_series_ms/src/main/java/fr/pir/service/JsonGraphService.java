@@ -58,19 +58,15 @@ public class JsonGraphService {
 
             for (Behavior behavior : node.getBehaviors()) {
                 behavior.setNode(node);
-                behavior.setBehaviorIndex(index);
+                behavior.setBehaviorIndex(index++);
                 this.behaviorRepository.save(behavior);
-
-                index++;
 
                 int order = 0;
 
                 for (Action action : behavior.getActions()) {
                     action.setBehavior(behavior);
-                    action.setActionOrder(order);
+                    action.setActionOrder(order++);
                     this.actionRepository.save(action);
-
-                    order++;
                 }
             }
         }
