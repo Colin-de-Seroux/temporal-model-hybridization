@@ -1,5 +1,8 @@
 package fr.pir.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -49,7 +52,7 @@ public class Action {
     /**
      * Values simulated before training the model.
      */
-    private double[] executionTimes;
+    private List<Double> executionTimes = new ArrayList<>();
 
     /**
      * The estimated time of the node in milliseconds by the AI.

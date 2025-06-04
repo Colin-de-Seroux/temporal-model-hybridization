@@ -179,3 +179,54 @@ paths:
               schema:
                 type: string
                 example: Oops, something went wrong.
+
+  /api/logs:
+    post:
+      tags:
+      - Logs
+      summary: Upload multiple log files
+      operationId: saveLogs
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                modelName:
+                  type: string
+                  description: Name of the model
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Logs saved successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "OK"
+        "400":
+          description: Invalid file format or content.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Invalid file format or content.
+        "404":
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Model not found: %s | Node not found: %s"
+        "500":
+          description: Oops, something went wrong.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Oops, something went wrong.

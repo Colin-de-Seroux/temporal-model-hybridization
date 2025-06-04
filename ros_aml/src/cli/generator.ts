@@ -158,6 +158,11 @@ function compileNode(pkgName: string, node: Node): CompositeGeneratorNode {
     nodeBlock.append(`        super().__init__('${node_name_lower_case}')`);
     nodeBlock.appendNewLine();
 
+    if (wantLog) {
+        nodeBlock.append(`        self.get_logger().info("${node.name}")`);
+        nodeBlock.appendNewLine();
+    }
+
     if (node.activation) {
         initBlock.append(compileActivation(node.activation));
     }
