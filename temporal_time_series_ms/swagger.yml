@@ -4,13 +4,84 @@ info:
   title: Temporal time series API
   description: API documentation for the Temporal sime series micro service.
   version: 1.0.0
+
 servers:
   - url: http://localhost:3001
     description: Local development server
 
+tags:
+  - name: Hello
+    description: Hello World! for test API
+  - name: Json Graph
+    description: Json graph
+
+components:
+  schemas:
+    Model:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+    Node:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        expectedExecTime:
+          type: number
+          format: double
+        behaviors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Behavior"
+    Behavior:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Action"
+    Action:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum: [timer, pub, sub, other]
+        topic:
+          type: string
+        value:
+          type: number
+          format: double
+        executionTimes:
+          type: array
+          items:
+            type: number
+            format: double
+        estimatedExecTime:
+          type: number
+          format: double
+
 paths:
   /:
     get:
+      tags:
+        - Hello
       summary: Returns a greeting message
       operationId: helloWorld
       responses:
@@ -23,6 +94,8 @@ paths:
                 example: Hello World!
   /hello:
     get:
+      tags:
+        - Hello
       summary: Returns a greeting message
       operationId: helloWorld
       responses:
@@ -35,6 +108,8 @@ paths:
                 example: Hello World!
   /api:
     get:
+      tags:
+        - Hello
       summary: Returns a greeting message
       operationId: helloWorld
       responses:
@@ -47,6 +122,8 @@ paths:
                 example: Hello World!
   /api/hello:
     get:
+      tags:
+        - Hello
       summary: Returns a greeting message
       operationId: helloWorld
       responses:
@@ -58,41 +135,47 @@ paths:
                 type: string
                 example: Hello World!
 
-  /api/logs:
+  /api/graph:
     post:
-      summary: Read, process and save logs
-      operationId: readProcessSaveLogs
-      parameters:
-        - name: pathFolder
-          in: query
-          description: The path to the folder containing the log files
-          required: true
-          schema:
-            type: string
+      tags:
+        - Json Graph
+      summary: Save a json graph of a model
+      operationId: saveJsonGraph
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
       responses:
         "200":
-          description: Successful response
+          description: File uploaded successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: Log files read, process and save successfully.
+                $ref: "#/components/schemas/Model"
         "400":
-          description: Path folder incorrect
+          description: Invalid file format or content.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: BAD_REQUEST
-                  message:
-                    type: string
-                    example: Path folder incorrect.
+                type: string
+                example: Invalid file format or content.
+        "409":
+          description: Duplicate entry.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Duplicate entry.
+        "500":
+          description: Oops, something went wrong.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Oops, something went wrong.
