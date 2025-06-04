@@ -16,14 +16,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
 @NoArgsConstructor
+@Setter
 @Entity
 @Table(name = "nodes", indexes = {
-        @Index(name = "idx_node_name", columnList = "name")
+    @Index(name = "idx_node_name", columnList = "name")
 })
 public class Node {
 

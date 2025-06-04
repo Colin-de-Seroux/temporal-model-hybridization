@@ -3,8 +3,6 @@ package fr.pir.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "models", indexes = {
-        @Index(name = "idx_model_name", columnList = "name")
+    @Index(name = "idx_model_name", columnList = "name")
 })
 public class Model {
 
@@ -35,5 +33,9 @@ public class Model {
 
     @OneToMany(mappedBy = "model", fetch = FetchType.LAZY)
     private Set<Node> nodes = new HashSet<>();
+
+    public Model(String name) {
+        this.name = name;
+    }
 
 }
