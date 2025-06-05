@@ -4,8 +4,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -46,6 +50,8 @@ public class DatasetService {
             int j = 0;
             int x = 0;
 
+            Map<String, List<Double>> executionPubMap = new HashMap<>();
+
             for (Node node : model.getNodes()) {
                 for (Behavior behavior : node.getBehaviors()) {
                     for (Action action : behavior.getActions()) {
@@ -53,6 +59,10 @@ public class DatasetService {
 
                         if (!executionTimes.isEmpty() && executionTimes.size() > x) {
                             x = executionTimes.size();
+                        }
+
+                        if (action.getType().equals("pub")) {
+                            executionPubMap.putIfAbsent(action.getTopic(), executionTimes);
                         }
                     }
                 }
@@ -72,15 +82,16 @@ public class DatasetService {
                             row[5] = action.getTopic() != null ? action.getTopic() : "";
                             row[6] = String.valueOf(action.getValue());
 
-                            if (y == 0 || action.getExecutionTimes().isEmpty() || action.getExecutionTimes().size() <= y) {
+                            if (y == 0 || action.getType().equals("pub") || action.getExecutionTimes().isEmpty() || action.getExecutionTimes().size() <= y) {
                                 row[7] = "0";
-                            } else {
-                                row[7] = String.format("%.5f", action.getExecutionTimes().get(y) - action.getExecutionTimes().get(y - 1));
+                            } else if (action.getType().equals("timer")) {
+                                row[7] = String.format(Locale.US, "%.5f", action.getExecutionTimes().get(y) - action.getExecutionTimes().get(y - 1));
+                            } else if (action.getType().equals("sub")) {
+                                row[7] = String.format(Locale.US, "%.5f", action.getExecutionTimes().get(y) - executionPubMap.get(action.getTopic()).get(y));
                             }
-                            
+
                             csvPrinter.printRecord((Object[]) row);
                         }
-
                     }
                 }
 
