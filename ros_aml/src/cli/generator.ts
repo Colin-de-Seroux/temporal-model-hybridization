@@ -504,7 +504,7 @@ function compileBehavior(
         const [actionInit, actionExec] = generateActionCode(
             action,
             b_index,
-            a_index
+            a_index + 1
         );
         initCode.append(actionInit);
         methodCode.append(actionExec);
