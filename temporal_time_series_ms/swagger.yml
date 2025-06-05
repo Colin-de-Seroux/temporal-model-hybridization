@@ -183,7 +183,7 @@ paths:
   /api/logs:
     post:
       tags:
-      - Logs
+        - Logs
       summary: Upload multiple log files
       operationId: saveLogs
       requestBody:
@@ -230,3 +230,31 @@ paths:
               schema:
                 type: string
                 example: Oops, something went wrong.
+
+  /api/dataset:
+    get:
+      tags:
+        - Dataset
+      summary: Get dataset
+      operationId: getDataset
+      responses:
+        "200":
+          description: Dataset retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: IO error while processing dataset
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "IO error while processing dataset: %s"
+        "500":
+          description: Error creating dataset
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error creating dataset: %s"
