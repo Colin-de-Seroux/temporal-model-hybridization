@@ -72,12 +72,12 @@ public class DatasetService {
                             row[5] = action.getTopic() != null ? action.getTopic() : "";
                             row[6] = String.valueOf(action.getValue());
 
-                            try {
-                                row[7] = String.valueOf(action.getExecutionTimes().get(y));
-                            } catch (IndexOutOfBoundsException e) {
+                            if (y == 0 || action.getExecutionTimes().isEmpty() || action.getExecutionTimes().size() <= y) {
                                 row[7] = "0";
+                            } else {
+                                row[7] = String.format("%.5f", action.getExecutionTimes().get(y) - action.getExecutionTimes().get(y - 1));
                             }
-
+                            
                             csvPrinter.printRecord((Object[]) row);
                         }
 
