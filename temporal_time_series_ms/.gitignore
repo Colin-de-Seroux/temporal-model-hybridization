@@ -35,3 +35,4 @@ build/
 ### Project ###
 /Logs/
 /paho*
+*.csv
