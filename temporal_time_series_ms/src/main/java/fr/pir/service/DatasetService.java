@@ -68,7 +68,7 @@ public class DatasetService {
                 }
             }
 
-            for (int y = 0; y < x - 1; y++) {
+            for (int y = 1; y < x - 1; y++) {
                 for (Node node : model.getNodes()) {
                     row[1] = node.getName() + "_" + j++;
 
