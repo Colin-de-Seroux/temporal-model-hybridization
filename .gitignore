@@ -8,5 +8,6 @@
 
 .env
 
-logs*
+TE_logs
+Logs/*
 ros2/src/*
