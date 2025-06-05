@@ -1,5 +1,5 @@
 hello
-logger info
+logger info training
 
 node Publisher
 expectedExecTime 1.0 ms

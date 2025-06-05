@@ -1,6 +1,5 @@
 pubSubSystem
-logger info
-
+logger info training
 node PubSub
 expectedExecTime 5.0 ms
 timer heartbeat period 1000.0 ms
