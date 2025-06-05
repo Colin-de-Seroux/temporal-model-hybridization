@@ -1,0 +1,16 @@
+example1
+logger info
+
+node Publisher
+expectedExecTime 1.0 ms
+
+timer publish_timer period 1000.0 ms
+
+when timerElapsed publish_timer do
+    sendMessage hello_topic "hello"
+
+node Subscriber
+expectedExecTime 1.0 ms
+
+when messageReceived hello_topic do
+    log info "I heard: hello"

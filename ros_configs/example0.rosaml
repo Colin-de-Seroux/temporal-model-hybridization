@@ -1,0 +1,10 @@
+example0
+logger info training
+
+node Publisher
+expectedExecTime 1.0 ms
+
+timer publish_timer period 1000.0 ms
+
+when timerElapsed publish_timer do
+    sendMessage hello_topic "hello"
