@@ -69,6 +69,16 @@ public class LogsService {
         return allLogs;
     }
 
+    private void saveActions(List<Behavior> behaviors) {
+        L.function("");
+
+        for (Behavior behavior : behaviors) {
+            for (Action action : behavior.getActions()) {
+                this.actionRepository.save(action);
+            }
+        }
+    }
+
     @Transactional
     public String saveLogs(String modelName, MultipartFile[] files) throws IOException, IllegalArgumentException {
         L.function("model name : {}, received files : {}", modelName, files.length);
@@ -108,17 +118,13 @@ public class LogsService {
                     List<Action> actions = behavior.getActions().stream()
                             .sorted(Comparator.comparing(Action::getActionOrder))
                             .collect(Collectors.toList());
-                    
+
                     Action action = actions.get(Integer.parseInt(words[2]));
                     action.getExecutionTimes().add(Double.parseDouble(words[3]));
                 }
             }
 
-            for (Behavior behavior : behaviors) {
-                for (Action action : behavior.getActions()) {
-                    this.actionRepository.save(action);
-                }
-            }
+            this.saveActions(behaviors);
         }
 
         return "OK";

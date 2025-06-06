@@ -38,6 +38,40 @@ public class JsonGraphService {
     @Autowired
     private ActionRepository actionRepository;
 
+    private Action createAction(Action action, Behavior behavior, int order) {
+        L.function("action order : {}", order);
+
+        action.setBehavior(behavior);
+        action.setActionOrder(order);
+
+        return this.actionRepository.save(action);
+    }
+
+    private Behavior createBehavior(Behavior behavior, Node node, int index) {
+        L.function("behavior index : {}", index);
+
+        behavior.setNode(node);
+        behavior.setBehaviorIndex(index);
+
+        return this.behaviorRepository.save(behavior);
+    }
+
+    private Node createNode(Node node, Model model) {
+        L.function("node name : {}", node.getName());
+
+        node.setModel(model);
+
+        return this.nodeRepository.save(node);
+    }
+
+    public Model createModel(String name) {
+        L.function("model name : {}", name);
+
+        Model model = new Model(name);
+        
+        return this.modelRepository.save(model);
+    }
+
     @Transactional
     public Model saveJsonGraph(MultipartFile file) throws IOException {
         L.function("file name : {}", file.getOriginalFilename());
@@ -46,27 +80,21 @@ public class JsonGraphService {
 
         Gson gson = new Gson();
         Model gsonModel = gson.fromJson(content, Model.class);
-        Model model = new Model(gsonModel.getName());
 
-        this.modelRepository.save(model);
+        Model model = this.createModel(gsonModel.getName());
 
         for (Node node : gsonModel.getNodes()) {
-            node.setModel(model);
-            this.nodeRepository.save(node);
+            this.createNode(node, model);
 
             int index = 0;
 
             for (Behavior behavior : node.getBehaviors()) {
-                behavior.setNode(node);
-                behavior.setBehaviorIndex(index++);
-                this.behaviorRepository.save(behavior);
+                this.createBehavior(behavior, node, index++);
 
                 int order = 0;
 
                 for (Action action : behavior.getActions()) {
-                    action.setBehavior(behavior);
-                    action.setActionOrder(order++);
-                    this.actionRepository.save(action);
+                    this.createAction(action, behavior, order++);
                 }
             }
         }
