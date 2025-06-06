@@ -30,10 +30,11 @@ public class DatasetService {
     private ModelRepository modelRepository;
 
     /**
-     * Generate a dataset from the models in the database and save it as a CSV file.
-     * 
+     * Generate a dataset from the models in the database and save it as a CSV
+     * file.
+     *
      * @return Path -> The path to the generated dataset CSV file
-     * 
+     *
      * @throws IOException
      */
     public Path getDataset() throws IOException {
@@ -75,16 +76,16 @@ public class DatasetService {
 
             for (int y = 1; y < x - 1; y++) {
                 for (Node node : model.getNodes()) {
-                    row[1] = node.getName() + "_" + j++;
+                    row[1] = String.format("%s_%d", node.getName(), j++);
 
                     for (Behavior behavior : node.getBehaviors()) {
                         row[2] = String.valueOf(behavior.getBehaviorIndex());
 
                         for (Action action : behavior.getActions()) {
-                            row[0] = model.getName() + "_" + i;
+                            row[0] = String.format("%s_%d", model.getName(), i);
                             row[3] = action.getType();
                             row[4] = String.valueOf(action.getActionOrder());
-                            row[5] = action.getTopic() != null ? action.getTopic() : "";
+                            row[5] = action.getTopic() != null ? String.format("%s_%d", action.getTopic(), i) : "";
                             row[6] = String.valueOf(action.getValue());
 
                             if (y == 0 || action.getType().equals("pub") || action.getExecutionTimes().isEmpty() || action.getExecutionTimes().size() <= y) {

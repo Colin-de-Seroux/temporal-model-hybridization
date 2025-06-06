@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   title: Temporal time series API
-  description: API documentation for the Temporal sime series micro service.
+  description: API documentation for the Temporal time series micro service.
   version: 1.0.0
 
 servers:

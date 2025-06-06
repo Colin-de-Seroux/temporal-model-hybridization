@@ -1,4 +1,4 @@
-example2
+example3
 logger info training
 
 node Publisher
@@ -9,14 +9,14 @@ timer publish_timer period 1000.0 ms
 when timerElapsed publish_timer do
     sendMessage hello_topic "hello"
 
-node Subscriber_Publisher
+node Subscriber0
 expectedExecTime 1.0 ms
 
 when messageReceived hello_topic do
-    sendMessage hello_received "hello"
+    log info "I heard: hello"
 
-node Subscriber
+node Subscriber1
 expectedExecTime 1.0 ms
 
-when messageReceived hello_received do
+when messageReceived hello_topic do
     log info "I heard: hello"
