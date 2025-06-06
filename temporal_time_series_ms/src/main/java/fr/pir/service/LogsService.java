@@ -34,6 +34,19 @@ public class LogsService {
     @Autowired
     private ActionRepository actionRepository;
 
+    /**
+     * Extract logs from a file and return the first element as the key and the
+     * lines as the value.
+     *
+     * @param file : MultipartFile -> The file from which logs are to be
+     * extracted
+     *
+     * @return Map.Entry<String, List<String>> -> A map entry where the key is
+     * the first element of the first line and the value is a list of all lines
+     * in the file
+     *
+     * @throws IOException
+     */
     private Map.Entry<String, List<String>> extractLogsFromFile(MultipartFile file) throws IOException {
         L.function("file name : {}", file.getOriginalFilename());
 
@@ -55,6 +68,19 @@ public class LogsService {
         return Map.entry(firstElement, lines);
     }
 
+    /**
+     * Extract logs from multiple files and return a map where the key is the
+     * first element of each file and the value is a list of all lines in that
+     * file.
+     *
+     * @param files : MultipartFile[] -> An array of files from which logs are
+     * to be extracted
+     *
+     * @return Map<String, List<String>> -> A map where the key is the first
+     * element of each file and the value is a list of all lines in that file
+     *
+     * @throws IOException
+     */
     private Map<String, List<String>> extractLogsFromFiles(MultipartFile[] files) throws IOException {
         L.function("received files : {}", files.length);
 
@@ -69,6 +95,12 @@ public class LogsService {
         return allLogs;
     }
 
+    /**
+     * Save actions from behaviors into the database.
+     *
+     * @param behaviors : List<Behavior> -> The list of behaviors containing
+     * actions
+     */
     private void saveActions(List<Behavior> behaviors) {
         L.function("");
 
@@ -79,6 +111,19 @@ public class LogsService {
         }
     }
 
+    /**
+     * Save logs from uploaded files for a specific model.
+     *
+     * @param modelName : String -> The name of the model for which logs are
+     * being saved
+     * @param files : MultipartFile[] -> Array of files containing logs to be
+     * saved
+     *
+     * @return String -> "OK" if logs are saved successfully
+     *
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
     @Transactional
     public String saveLogs(String modelName, MultipartFile[] files) throws IOException, IllegalArgumentException {
         L.function("model name : {}, received files : {}", modelName, files.length);

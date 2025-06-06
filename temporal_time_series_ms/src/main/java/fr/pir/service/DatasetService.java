@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +29,13 @@ public class DatasetService {
     @Autowired
     private ModelRepository modelRepository;
 
+    /**
+     * Generate a dataset from the models in the database and save it as a CSV file.
+     * 
+     * @return Path -> The path to the generated dataset CSV file
+     * 
+     * @throws IOException
+     */
     public Path getDataset() throws IOException {
         L.function("");
 
