@@ -1,6 +1,5 @@
 package fr.pir.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -27,6 +26,11 @@ public class DatasetController {
     @Autowired
     private DatasetService datasetService;
 
+    /**
+     * Get the dataset file.
+     * 
+     * @return ResponseEntity<Resource> | ResponseEntity<String> -> The dataset file or the error message
+     */
     @GetMapping
     public ResponseEntity<?> getDataset() {
         L.function("");

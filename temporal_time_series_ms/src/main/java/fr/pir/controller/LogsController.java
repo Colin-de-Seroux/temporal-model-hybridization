@@ -3,7 +3,6 @@ package fr.pir.controller;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,8 +24,16 @@ public class LogsController {
     @Autowired
     private LogsService logsService;
 
+    /**
+     * Save logs in DB from uploaded files for a specific model.
+     * 
+     * @param modelName : String -> The name of the model for which logs are being saved
+     * @param files : MultipartFile[] -> Array of files containing logs to be saved
+     * 
+     * @return ResponseEntity<String> -> The 'OK' message or the error message
+     */
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<?> saveLogs(@RequestParam String modelName, @RequestPart("files") MultipartFile[] files) {
+    public ResponseEntity<String> saveLogs(@RequestParam String modelName, @RequestPart("files") MultipartFile[] files) {
         L.function("model name : {}, received files : {}", modelName, files.length);
 
         try {

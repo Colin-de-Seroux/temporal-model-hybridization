@@ -25,6 +25,14 @@ public class JsonGraphController {
     @Autowired
     private JsonGraphService jsonGraphService;
 
+    /**
+     * Endpoint to save a JSON graph from a multipart file.
+     *
+     * @param file : MultipartFile -> The file containing the JSON graph
+     *
+     * @return ResponseEntity<Model> | ResponseEntity<String> -> The Model or
+     * the error message
+     */
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<?> saveJsonGraph(@RequestPart("file") MultipartFile file) {
         L.info("received file : {}", file.getOriginalFilename());
