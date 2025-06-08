@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { Node, RosAmlAstType } from './generated/ast.js';
+import type { Node, RosAmlAstType, Timer } from './generated/ast.js';
 import type { RosAmlServices } from './ros-aml-module.js';
 
 /**
@@ -29,4 +29,16 @@ export class RosAmlValidator {
             }
         }
     }
+
+    // validateTimerExecution(timer: Timer, accept: ValidationAcceptor) {
+    //     const predicted = Number((timer as any).predictedPeriod);
+    //     const period = Number(timer.period);
+    //     if (!isNaN(predicted) && !isNaN(period) && Math.abs(predicted - period) > 10) {
+    //         accept('warning', `The predicted period (${predicted}ms) differs significantly from the specified period (${period}ms).`, {
+    //             node: timer,
+    //             property: 'period'
+    //         });
+    //     }
+    // }
+
 }
