@@ -23,9 +23,10 @@ def encode_action_type(action_type):
         'sub': [0, 0, 1]
     }.get(action_type, [0, 0, 0])
 
-def create_dataset(csv_path):
+def create_dataset(csv_path, is_prediction=False):
     df = pd.read_csv(csv_path)
     df = df.sort_values(by=["ModelName", "NodeName", "ActionOrder"])
+    has_execution_time = "ExecutionTime" in df.columns and not is_prediction
 
     unique_topics = df["Topic"].dropna().unique()
     topic_to_id = {topic: i for i, topic in enumerate(unique_topics)}
@@ -50,9 +51,15 @@ def create_dataset(csv_path):
                 period = row["Value"] / 1000.0 if row["ActionType"] == "timer" else row["Value"]
                 feature_vector = one_hot + [topic_id, period, row["ActionOrder"]]
                 features.append(feature_vector)
-                exec_time = row["ExecutionTime"]
-                targets.append(exec_time)
-                node_exec_time[node_id] = exec_time
+                if has_execution_time:
+                    print("has_execution_time : ",has_execution_time)
+                    exec_time = row["ExecutionTime"]
+                    targets.append(exec_time)
+                    node_exec_time[node_id] = exec_time
+                else:
+                    targets.append(0.0)  
+                    node_exec_time[node_id] = 0.0
+               
 
         num_nodes = len(node_index_map)
         x = np.array(features)
