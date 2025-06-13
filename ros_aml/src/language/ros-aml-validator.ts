@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { Node, RosAmlAstType, Timer } from './generated/ast.js';
+import type { Node, RosAmlAstType } from './generated/ast.js';
 import type { RosAmlServices } from './ros-aml-module.js';
 
 /**
