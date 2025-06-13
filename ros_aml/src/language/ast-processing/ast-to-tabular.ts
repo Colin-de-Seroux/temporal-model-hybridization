@@ -7,7 +7,7 @@ type TabularBehaviorAction = {
     actionType: string;
     actionOrder: number;
     topic: string;
-    value: string;
+    value: number;
 };
 
 export function tabularModel(model: Model): TabularBehaviorAction[] {
@@ -31,7 +31,7 @@ export function tabularModel(model: Model): TabularBehaviorAction[] {
                     actionType: 'timer',
                     actionOrder: 0,
                     topic: '',
-                    value: period
+                    value: Number(period)
                 });
             }
             else if (isMessageReceived(behavior.trigger)) {
@@ -42,7 +42,7 @@ export function tabularModel(model: Model): TabularBehaviorAction[] {
                     actionType: 'sub',
                     actionOrder: 0,
                     topic: behavior.trigger.topic ?? '',
-                    value: '0.0'
+                    value: 0.0
                 });
             }
 
@@ -55,7 +55,7 @@ export function tabularModel(model: Model): TabularBehaviorAction[] {
                         actionType: 'pub',
                         actionOrder: aIndex ,
                         topic: action.topic ?? '',
-                        value: '0.0'
+                        value: 0.0
                     });
                 } 
             });
