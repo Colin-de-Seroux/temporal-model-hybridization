@@ -30,6 +30,12 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
             continue; 
         }
         const model = document.parseResult.value as Model;
+        const hasNodeWithBehavior = model.nodes?.some(node => node.behaviors && node.behaviors.length > 0);
+
+        if (!hasNodeWithBehavior) {
+            console.log(`Document ${document.uri} has no node with behaviors. AST not sent.`);
+            continue;
+        }
 
         const jsonAst = JsonSerializer.serialize(model, {
             sourceText: false,
