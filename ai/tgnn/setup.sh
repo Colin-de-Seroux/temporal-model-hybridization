@@ -12,5 +12,8 @@ pip install torch-geometric
 pip install torch-geometric-temporal
 
 pip install numpy
+pip install pandas
+pip install Flask
+pip install Flask-Cors
 
 echo "Installation terminée avec succès !"
