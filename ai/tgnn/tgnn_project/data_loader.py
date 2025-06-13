@@ -23,6 +23,14 @@ def encode_action_type(action_type):
         'sub': [0, 0, 1]
     }.get(action_type, [0, 0, 0])
 
+def preprocess_ast_data(ast_data):
+    df = pd.DataFrame(ast_data)
+    print(df)
+    df['value'] = df['value'].astype(float)
+    df['actionOrder'] = df['actionOrder'].astype(int)
+
+    return df
+
 def create_dataset(csv_path, is_prediction=False):
     df = pd.read_csv(csv_path)
     df = df.sort_values(by=["ModelName", "NodeName", "ActionOrder"])
