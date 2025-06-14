@@ -23,9 +23,9 @@ def preprocess_ast_data(ast_data):
     })
 
     print(df)
-    df['value'] = df['value'].astype(float)
-    df['actionOrder'] = df['actionOrder'].astype(int)
-    df['behaviorOrder'] = df['behaviorOrder'].astype(int)
+    df['Value'] = df['Value'].astype(float)
+    df['ActionOrder'] = df['ActionOrder'].astype(int)
+    df['BehaviorIndex'] = df['BehaviorIndex'].astype(int)
 
 
     return df

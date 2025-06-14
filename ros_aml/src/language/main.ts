@@ -10,19 +10,22 @@ import fetch from 'node-fetch';
 import { DocumentState } from 'langium';
 import { Model } from './generated/ast.js';
 import { tabularModel } from './ast-processing/ast-to-tabular.js';
+import crypto from 'crypto';
 
-// Create a connection to the client
 const connection = createConnection(ProposedFeatures.all);
 
-// Inject the shared services and language-specific services
-const { shared /*, RosAml*/} = createRosAmlServices({ connection, ...NodeFileSystem });
+const { shared } = createRosAmlServices({ connection, ...NodeFileSystem });
 
-// Start the language server with the shared services
 startLanguageServer(shared);
 
-// type DocumentChange = { uri: string, content: string, diagnostics: Diagnostic[] };
 
-// const JsonSerializer = RosAml.serializer.JsonSerializer;
+
+const lastSentHashes = new Map<string, string>();
+
+function hashData(data: any): string {
+    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+}
+
 shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async documents => {
     for (const document of documents) {
         const hasErrors = (document.diagnostics ?? []).some(d => d.severity === 1);
@@ -38,13 +41,17 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
             continue;
         }
 
-        // const jsonAst = JsonSerializer.serialize(model, {
-        //     sourceText: false,
-        //     textRegions: false
-        // });
+        const rows = tabularModel(model);
+        const currentHash = hashData(rows);
+        const uriString = document.uri.toString();
+        if (lastSentHashes.get(uriString) === currentHash) {
+            
+            console.log(`Document ${uriString} content unchanged, skipping API call.`);
+            continue;
+        }
+
 
         try {
-            const rows = tabularModel(model);
             const response = await fetch('http://localhost:5000/receive-ast', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -53,6 +60,8 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
 
             const result = await response.json();
             console.log("API response:", result);
+            lastSentHashes.set(uriString, currentHash);
+
         } catch (err) {
             console.error("Error sending AST:", err);
         }

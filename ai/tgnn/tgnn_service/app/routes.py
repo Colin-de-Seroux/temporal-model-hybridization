@@ -1,10 +1,11 @@
+import traceback
 from flask import Blueprint, request, jsonify
 from app.model_loader import load_model_and_scalers
 import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from tgnn_project.tgnn_project.data_loader import preprocess_ast_data
+from tgnn_project.tgnn_project.preprocess import preprocess_ast_data
 
 main_blueprint = Blueprint('main', __name__)
 
@@ -26,4 +27,6 @@ def receive_ast():
 
         return jsonify(data)
     except Exception as e:
+        print("Exception in /receive-ast:", e)
+        traceback.print_exc() 
         return jsonify({"error": str(e)}), 500
