@@ -1,7 +1,10 @@
-# Requirements
-create .venv
+# Befure using tgnn project 
 
-then  activate it :
+placed in /tgnn :
+
+1. create .venv
+
+2. activate it :
 ```bash
 .\.venv\Scripts\activate
 ```
