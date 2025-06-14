@@ -8,7 +8,7 @@ import { createRosAmlServices } from './ros-aml-module.js';
 
 import fetch from 'node-fetch';
 import { DocumentState } from 'langium';
-import { Model } from './generated/ast.js';
+import { Model, PredictedResult } from './generated/ast.js';
 import { tabularModel } from './ast-processing/ast-to-tabular.js';
 import crypto from 'crypto';
 
@@ -25,6 +25,7 @@ const lastSentHashes = new Map<string, string>();
 function hashData(data: any): string {
     return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }
+
 
 shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async documents => {
     for (const document of documents) {
@@ -58,10 +59,23 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
                 body: JSON.stringify(rows)
             });
 
-            const result = await response.json();
-            console.log("API response:", result);
+            const predictions = await response.json() as number[];
             lastSentHashes.set(uriString, currentHash);
 
+            if (!model.predictedResults) {
+                model.predictedResults = [];
+            }
+            console.log("API response:", predictions);
+            predictions.forEach((pred, index) => {
+                const result: PredictedResult = {
+                    $type: 'PredictedResult',
+                    predictedTime: pred.toString(),
+                    $container: model
+                };
+                model.predictedResults.push(result);
+            });
+
+            
         } catch (err) {
             console.error("Error sending AST:", err);
         }

@@ -4,7 +4,11 @@ entry Model:
     systemName=ID?
     logger=LoggerLevel?
     nodes+=Node*
-    constraints+=TemporalConstraint*;
+    constraints+=TemporalConstraint*
+    predictedResults +=PredictedResult*;
+
+PredictedResult:
+    'predicted' predictedTime=DOUBLE;
 
 LoggerLevel:
     'logger' level=LEVEL training="training"?;

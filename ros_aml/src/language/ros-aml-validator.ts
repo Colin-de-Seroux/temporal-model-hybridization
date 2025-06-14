@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { Node, RosAmlAstType } from './generated/ast.js';
+import type { Model, Node, RosAmlAstType } from './generated/ast.js';
 import type { RosAmlServices } from './ros-aml-module.js';
 
 /**
@@ -10,6 +10,7 @@ export function registerValidationChecks(services: RosAmlServices) {
     const validator = services.validation.RosAmlValidator;
     const checks: ValidationChecks<RosAmlAstType> = {
         Node: validator.checkPersonStartsWithCapital,
+        Model: validator.checkModelPredictions
     };
     registry.register(checks, validator);
 }
@@ -27,6 +28,25 @@ export class RosAmlValidator {
                     property: 'name',
                 });
             }
+        }
+    }
+
+    
+    checkModelPredictions(model: Model, accept: ValidationAcceptor): void {
+        if (model.predictedResults && model.predictedResults.length > 0) {
+            console.log(`Modèle "${model.systemName ?? 'inconnu'}" contient ${model.predictedResults.length} prédiction(s) :`);
+            model.predictedResults.forEach((p, i) => {
+                console.log(`  [${i}] predictedTime = ${p.predictedTime}`);
+            });
+
+            accept('info', `Ce modèle contient ${model.predictedResults.length} prédiction(s):  ${model.predictedResults.map(p => p.predictedTime).join(', ')}`, {
+                node: model
+            });
+        }
+        else {
+            accept('warning', `Ce modèle ${model.predictedResults.length} ne contient aucune prédiction : ${model.predictedResults.map(p => p.predictedTime).join(', ')}`, {
+                node: model
+            });
         }
     }
 
