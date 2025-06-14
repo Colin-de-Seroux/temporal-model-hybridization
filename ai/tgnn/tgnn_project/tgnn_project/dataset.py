@@ -1,6 +1,10 @@
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
+
+from tgnn_project.preprocess import encode_action_type
+
 
 class CustomDynamicGraphTemporalSignal(DynamicGraphTemporalSignal):
     def __init__(self, edge_indices, edge_weights, features, targets):
@@ -16,20 +20,6 @@ class CustomDynamicGraphTemporalSignal(DynamicGraphTemporalSignal):
                 "edge_weight": self.edge_weights[i]
             })
 
-def encode_action_type(action_type):
-    return {
-        'timer': [1, 0, 0],
-        'pub': [0, 1, 0],
-        'sub': [0, 0, 1]
-    }.get(action_type, [0, 0, 0])
-
-def preprocess_ast_data(ast_data):
-    df = pd.DataFrame(ast_data)
-    print(df)
-    df['value'] = df['value'].astype(float)
-    df['actionOrder'] = df['actionOrder'].astype(int)
-
-    return df
 
 def create_dataset(csv_path, is_prediction=False):
     df = pd.read_csv(csv_path)

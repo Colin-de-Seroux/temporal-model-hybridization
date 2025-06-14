@@ -1,4 +1,4 @@
-# Before using tgnn project 
+# Before using tgnn 
 
 placed in /tgnn :
 

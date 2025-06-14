@@ -22,7 +22,8 @@ def receive_ast():
         df = preprocess_ast_data(data)
 
         # pred = predict(model, df, feature_scaler, target_scaler)
+        print("Received AST data:", data)
 
-        return jsonify({df})
+        return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

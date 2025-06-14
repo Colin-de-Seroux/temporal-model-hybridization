@@ -1,4 +1,4 @@
-from tgnn_project.data_loader import create_dataset
+from tgnn_project.dataset import create_dataset
 from tgnn_project.train import train_model, predict
 import networkx as nx
 import matplotlib.pyplot as plt
