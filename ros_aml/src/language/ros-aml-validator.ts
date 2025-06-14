@@ -43,11 +43,7 @@ export class RosAmlValidator {
                 node: model
             });
         }
-        else {
-            accept('warning', `Ce modèle ${model.predictedResults.length} ne contient aucune prédiction : ${model.predictedResults.map(p => p.predictedTime).join(', ')}`, {
-                node: model
-            });
-        }
+        
     }
 
     // validateTimerExecution(timer: Timer, accept: ValidationAcceptor) {

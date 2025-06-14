@@ -75,6 +75,9 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
                 model.predictedResults.push(result);
             });
 
+            await shared.workspace.DocumentBuilder.update([document.uri], []);
+
+
             
         } catch (err) {
             console.error("Error sending AST:", err);
