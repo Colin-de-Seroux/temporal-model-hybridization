@@ -68,4 +68,4 @@ Delete Logs.
 
 ## Architecture
 
-![architecture](readme_pictures/architecture.png)
+![architecture](readme_pictures/architecture2.png)
