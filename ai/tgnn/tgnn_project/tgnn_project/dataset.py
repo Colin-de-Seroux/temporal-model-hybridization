@@ -3,7 +3,10 @@ import numpy as np
 import pandas as pd
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
 
-from tgnn_project.preprocess import encode_action_type
+try:
+    from tgnn_project.preprocess import encode_action_type
+except ModuleNotFoundError:
+    from tgnn_project.tgnn_project.preprocess import encode_action_type
 
 
 class CustomDynamicGraphTemporalSignal(DynamicGraphTemporalSignal):
@@ -21,8 +24,15 @@ class CustomDynamicGraphTemporalSignal(DynamicGraphTemporalSignal):
             })
 
 
-def create_dataset(csv_path, is_prediction=False):
-    df = pd.read_csv(csv_path)
+def create_dataset(data_source, is_prediction=False):
+    if isinstance(data_source, str):
+        df = pd.read_csv(data_source)
+    elif isinstance(data_source, pd.DataFrame):
+        df = data_source.copy()
+    else:
+        raise ValueError("data_source must be a file path or a pandas DataFrame")
+
+
     df = df.sort_values(by=["ModelName", "NodeName", "ActionOrder"])
     has_execution_time = "ExecutionTime" in df.columns and not is_prediction
 

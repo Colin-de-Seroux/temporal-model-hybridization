@@ -1,20 +1,19 @@
 from tgnn_project.dataset import create_dataset
-from tgnn_project.train import train_model, predict
+from tgnn_project.train import train_model
 import networkx as nx
 import matplotlib.pyplot as plt
 import joblib
 import torch
 import os
+import config
 
 
 def main():
-    base_dir = os.path.join("..", "dataset")
-    save_dir = os.path.join("..", "save2")
-
-    dataset_path = os.path.join(base_dir, "dataset.csv")
-    save_model_path = os.path.join(save_dir, "model.pth")
-    save_feature_scaler_path = os.path.join(save_dir, "feature_scaler.pkl")
-    save_target_scaler_path = os.path.join(save_dir, "target_scaler.pkl")
+    save_dir = config.SAVE_DIR
+    dataset_path = config.DATASET_PATH
+    save_model_path = config.MODEL_PATH
+    save_feature_scaler_path = config.FEATURE_SCALER_PATH
+    save_target_scaler_path = config.TARGET_SCALER_PATH
 
     dataset = create_dataset(dataset_path)
     model, feature_scaler, target_scaler = train_model(dataset, epochs=30, lr=0.01)

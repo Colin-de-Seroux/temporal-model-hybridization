@@ -6,6 +6,8 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from tgnn_project.tgnn_project.preprocess import preprocess_ast_data
+from tgnn_project.tgnn_project.dataset import create_dataset
+from tgnn_project.tgnn_project.predict import predict
 
 main_blueprint = Blueprint('main', __name__)
 
@@ -21,11 +23,12 @@ def receive_ast():
     data = request.get_json()
     try:
         df = preprocess_ast_data(data)
-
-        # pred = predict(model, df, feature_scaler, target_scaler)
+        dataset = create_dataset(df, is_prediction=True)
+        predictions = predict(model, dataset, feature_scaler, target_scaler)
         print("Received AST data:", data)
+        print("Predictions:", predictions)
 
-        return jsonify(data)
+        return jsonify(predictions)
     except Exception as e:
         print("Exception in /receive-ast:", e)
         traceback.print_exc() 
