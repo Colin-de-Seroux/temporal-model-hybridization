@@ -7,6 +7,7 @@
 /postgres/data/
 
 .env
+.venv
 
 TE_logs
 Logs/*
