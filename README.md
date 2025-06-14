@@ -6,13 +6,13 @@
 cd ros_aml
 npm install
 ```
-Make 1. and 2. in one command
+Generate grammar & build & generate all ROS2 packages accordinf to `ros_config` `.rosaml` files
 ```bash
 npm run all 
 ```
 Exemple of **.rosaml** files can be found in `ros_configs`
 
-Generated packages can be found in `ros2\src`
+Generated packages will be generated in `ros2\src`
 
 **OR :**
 
@@ -32,6 +32,11 @@ To generate one file
 ```bash
 npm run cli ..\ros_packages\your_file.rosaml
 ```
+### See the predictions in real time for a .rosaml file
+Launch API `ai/tgnn/tgnn_service` : [described in ai/tgnn/README.md](ai/tgnn/README.md)
+
+Press `F5` to open a new window with your extension loaded.
+Open `.rosaml` file 
 
 
 ## Environment
