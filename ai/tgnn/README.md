@@ -1,11 +1,23 @@
 # Requirements
-.venv
+create .venv
 
-setup.sh has all the dependancies to install
+then  activate it :
+```bash
+.\.venv\Scripts\activate
+```
+[pytorch Start Locally](https://pytorch.org/get-started/locally/)
 
+Install dependencies : 
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
+```bash
+pip install -r requirements.txt
+
+```
+
+setup.sh has all the dependancies to install
+
 # Training
 ## Description
 Input : 
