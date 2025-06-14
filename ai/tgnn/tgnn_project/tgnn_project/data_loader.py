@@ -60,7 +60,6 @@ def create_dataset(csv_path, is_prediction=False):
                 feature_vector = one_hot + [topic_id, period, row["ActionOrder"]]
                 features.append(feature_vector)
                 if has_execution_time:
-                    print("has_execution_time : ",has_execution_time)
                     exec_time = row["ExecutionTime"]
                     targets.append(exec_time)
                     node_exec_time[node_id] = exec_time

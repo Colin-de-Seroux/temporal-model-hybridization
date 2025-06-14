@@ -15,5 +15,8 @@ pip install numpy
 pip install pandas
 pip install Flask
 pip install Flask-Cors
+pip install scikit-learn
+pip install matplotlib
+
 
 echo "Installation terminée avec succès !"
