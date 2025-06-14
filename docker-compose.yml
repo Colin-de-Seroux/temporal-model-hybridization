@@ -17,30 +17,7 @@ services:
     networks:
       tmh-net:
         ipv4_address: 172.35.0.2
-  pub_and_sub:
-    image: pub_and_sub
-    build:
-      context: ./ros2/src/pub_and_sub
-      dockerfile: Dockerfile
-    container_name: pub_and_sub
-    environment:
-      - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-      - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-      - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-      - ROS_HOME=/ros2_ws/.ros
-    volumes:
-      - ./ros2/src/pub_and_sub/Logs:/ros_logs_backup
-    tmpfs:
-      - /ros2_ws/.ros/log # To RAM
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 200M
-        reservations:
-          cpus: "1"
-          memory: 200M
-  
+
   # temporal_execution:
   #   image: temporal_execution
   #   build:
@@ -66,28 +43,28 @@ services:
   #         memory: 200M
   #   command: /entrypoint.sh
 
-  #temporal_time_series_ms:
-   # image: temporal_time_series_ms
-    #build:
-     # context: ./temporal_time_series_ms
-      #dockerfile: Dockerfile
-  #  container_name: temporal_time_series_ms
-  #  environment:
-  #    - TZ=Europe/Paris
-  #    - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-  #    - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-  #    - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-  #    - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-  #  volumes:
-  #    - ./temporal_time_series_ms/Logs:/app/Logs
-  #    - ./temporal_time_series_ms/TE_logs:/app/TE_logs
-  #  ports:
-  #    - "${API_PORT}:3001"
-  #  depends_on:
-  #    - postgres
-  #  networks:
-  #    tmh-net:
-  #      ipv4_address: 172.35.0.3
+  temporal_time_series_ms:
+    image: temporal_time_series_ms
+    build:
+      context: ./temporal_time_series_ms
+      dockerfile: Dockerfile
+    container_name: temporal_time_series_ms
+    environment:
+      - TZ=Europe/Paris
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+    volumes:
+      - ./temporal_time_series_ms/Logs:/app/Logs
+      - ./temporal_time_series_ms/TE_logs:/app/TE_logs
+    ports:
+      - "${API_PORT}:3001"
+    depends_on:
+      - postgres
+    networks:
+      tmh-net:
+        ipv4_address: 172.35.0.3
 
 networks:
   tmh-net:
