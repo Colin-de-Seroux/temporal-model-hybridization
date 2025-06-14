@@ -59,3 +59,8 @@ failed to solve: archive/tar: unknown file mode ?rwxr-xr-x
 ```
 
 Delete Logs.
+
+
+## Architecture
+
+![architecture](readme_pictures/architecture.png)
