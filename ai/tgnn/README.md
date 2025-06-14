@@ -1,4 +1,4 @@
-# Befure using tgnn project 
+# Before using tgnn project 
 
 placed in /tgnn :
 
