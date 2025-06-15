@@ -87,11 +87,11 @@ Represent ROS 2 *actions* or *triggers*: `Publisher`, `Subscriber`, `Timer` ...
 
 The graph is **dynamic** over time, **new actions** may **appear/desappear** and **connections** may **change** (based on **active topics** or **triggered timers**).
 
-`DynamicGraphTemporalSignal` : Each time snapshot int the dataset represents:
+**`DynamicGraphTemporalSignal`** : Each time snapshot int the dataset represents:
 
 - The **graph** of active ROS 2 actions/triggers at time `t`
 - The **edges** (topics/timers) and their weights
-- Node **features**
+- Node **features** : all dataset columns except `ExecutionTime`
 - **Target** values : execution time 
 
 ### Launch tgnn_project
