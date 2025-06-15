@@ -62,15 +62,37 @@ ERROR: Failed to build installable wheels for some pyproject.toml based projects
 
 ### Description
 
-Input :
+**Input :**
 
 - csv with datas froms simulations
 
-Output :
+**Output :**
 
 - save the model trained in `save/model.pth`
 - `save/feature_scaler.pkl`
 - `save/target_scaler.pkl`
+
+**Model :**
+
+`GConvGRU` : temporal prediction in ROS 2 system, where the structure and timing of actions (such as publish, subscribe, timer) evolve over time and can be reprsented as a dynamic graph.
+
+**Graph nodes :**
+
+Represent ROS 2 *actions* or *triggers*: `Publisher`, `Subscriber`, `Timer` ...
+
+**Graph edges :**
+
+- **Topic connections** (e.g., a `Publisher` connected to a `Subscriber`) with *edge weight = abs(subscriber_execution_time - publisher_execution_time)*
+- **Timer-based triggers** (e.g., a `Timer` connected to a `Publisher`) with *edge weight = abs(publisher_execution_time - timer_execution_time)*
+
+The graph is **dynamic** over time, **new actions** may **appear/desappear** and **connections** may **change** (based on **active topics** or **triggered timers**).
+
+`DynamicGraphTemporalSignal` : Each time snapshot int the dataset represents:
+
+- The **graph** of active ROS 2 actions/triggers at time `t`
+- The **edges** (topics/timers) and their weights
+- Node **features**
+- **Target** values : execution time 
 
 ### Launch tgnn_project
 
@@ -85,13 +107,13 @@ python .\__main__.py
 
 #### Flask API
 
-Input :
+**Input :**
 
 - `save/model.pth`
 - `save/feature_scaler.pkl`
 - `save/target_scaler.pkl`
 
-Routes :
+**Routes :**
 
 - `/receive-ast` : receive in tabular format the informations of `.aml` configuration
 
