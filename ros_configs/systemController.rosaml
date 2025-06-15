@@ -1,6 +1,6 @@
 systemController
-
 logger info
+loopNbTime 333.333
 
 node Sensor
     expectedExecTime  5.0 ms
