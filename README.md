@@ -22,15 +22,15 @@ npm run langium:generate
 
 npm run build
 ```
-2. Generate all ROS2 packages from `.rosaml` config files placed in `ros_configs` directory.
+2. a. Generate **all ROS2 packages** from `.rosaml` config files placed in `ros_configs` directory.
 
 ```bash
 npm run cli:all
 ```
 
-To generate a single ROS2 package with one config file 
+2. b. Generate a **single ROS2 package** with one `.rosaml` config file 
 ```bash
-npm run cli ..\ros_packages\your_file.rosaml
+npm run cli ..\ros_configs\your_file.rosaml
 ```
 ## Real-Time AI Predictions for `.rosaml` files
 To see predictions in real-time:
