@@ -53,7 +53,7 @@ export function tabularModel(model: Model): TabularBehaviorAction[] {
                         nodeName,
                         behaviorIndex: bIndex,
                         actionType: 'pub',
-                        actionOrder: aIndex ,
+                        actionOrder: aIndex + 1,
                         topic: action.topic ?? '',
                         value: 0.0
                     });

@@ -8,7 +8,7 @@ import { createRosAmlServices } from './ros-aml-module.js';
 
 import fetch from 'node-fetch';
 import { DocumentState } from 'langium';
-import { Model, PredictedResult } from './generated/ast.js';
+import { Model } from './generated/ast.js';
 import { tabularModel } from './ast-processing/ast-to-tabular.js';
 import crypto from 'crypto';
 
@@ -66,14 +66,28 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, async doc
                 model.predictedResults = [];
             }
             console.log("API response:", predictions);
-            predictions.forEach((pred, index) => {
-                const result: PredictedResult = {
-                    $type: 'PredictedResult',
-                    predictedTime: pred.toString(),
-                    $container: model
-                };
-                model.predictedResults.push(result);
-            });
+            let predictionIndex = 0;
+
+            for (const row of rows) {
+                const { nodeName, behaviorIndex, actionOrder } = row;
+                const node = model.nodes?.find(n => n.name === nodeName);
+                if (!node) continue;
+
+                const behavior = node.behaviors?.[behaviorIndex];
+                if (!behavior) continue;
+
+                const prediction = predictions[predictionIndex++];
+                if (actionOrder === 0) {
+                    const trigger = behavior.trigger;
+                    (trigger as any).predictedTime = prediction;
+                } else {
+                    const action = behavior.action?.[actionOrder-1];
+                    if (!action) continue;
+                    (action as any).predictedTime = prediction;
+                }
+
+
+            }
 
             await shared.workspace.DocumentBuilder.update([document.uri], []);
 

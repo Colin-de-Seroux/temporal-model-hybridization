@@ -57,16 +57,16 @@ TimerElapsed:
     'timerElapsed' timer=ID? ('predicted' predictedTime=DOUBLE 'ms')?;
 
 ServiceRequest:
-    'serviceRequest' service=ID;
+    'serviceRequest' service=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 
 ActionGoalReceived:
-    'actionGoalReceived' action=ID;
+    'actionGoalReceived' action=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 
 ParamChanged:
-    'paramChanged' param=ID;
+    'paramChanged' param=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 
 StateChanged:
-    'stateChanged' state=ID;
+    'stateChanged' state=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 Action:
     SendMessage | 
     LogMessage | 
@@ -80,22 +80,22 @@ SendMessage:
     'sendMessage' topic=ID message=STRING ('qos' qos=QoS)? ('predicted' predictedTime=DOUBLE 'ms')?;
 
 LogMessage:
-    'log' level=LEVEL message=STRING;
+    'log' level=LEVEL message=STRING ('predicted' predictedTime=DOUBLE 'ms')?;
 
 CallService:
-    'callService' service=ID (request=STRING)? expectedTime=DOUBLE 'ms';
+    'callService' service=ID (request=STRING)? expectedTime=DOUBLE 'ms' ('predicted' predictedTime=DOUBLE 'ms')?;
 
 SetParam:
-    'setParam' param=ID value=Value;
+    'setParam' param=ID value=Value ('predicted' predictedTime=DOUBLE 'ms')?;
 
 GetParam:
-    'getParam' param=ID;
+    'getParam' param=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 
 UpdateState:
-    'updateState' state=ID value=Value;
+    'updateState' state=ID value=Value ('predicted' predictedTime=DOUBLE 'ms')?;
 
 SendActionGoal:
-    'sendActionGoal' action=ID (goal=STRING)? expectedTime=DOUBLE 'ms';
+    'sendActionGoal' action=ID (goal=STRING)? expectedTime=DOUBLE 'ms' ('predicted' predictedTime=DOUBLE 'ms')?;
 
 Value:
     intValue=INT | doubleValue=DOUBLE| boolValue=BOOL | stringValue=STRING ;
