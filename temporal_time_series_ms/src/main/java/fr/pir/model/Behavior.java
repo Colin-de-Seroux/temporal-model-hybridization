@@ -14,7 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,18 +25,18 @@ import lombok.Setter;
 @Table(name = "behaviors")
 public class Behavior {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
 
-    @Column(nullable = false)
-    private int behaviorIndex;
+	@Column(nullable = false)
+	private int behaviorIndex;
 
-    @OneToMany(mappedBy = "behavior", fetch = FetchType.LAZY)
-    private Set<Action> actions = new HashSet<>();
+	@OneToMany(mappedBy = "behavior", fetch = FetchType.LAZY)
+	private Set<Action> actions = new HashSet<>();
 
-    @JsonIgnore
-    @ManyToOne
-    private Node node;
+	@JsonIgnore
+	@ManyToOne
+	private Node node;
 
 }

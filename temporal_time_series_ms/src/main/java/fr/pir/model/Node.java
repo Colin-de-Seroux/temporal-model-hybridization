@@ -15,7 +15,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,29 +23,27 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Entity
-@Table(name = "nodes", indexes = {
-    @Index(name = "idx_node_name", columnList = "name")
-})
+@Table(name = "nodes", indexes = { @Index(name = "idx_node_name", columnList = "name") })
 public class Node {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
 
-    @Column(nullable = false)
-    private String name;
+	@Column(nullable = false)
+	private String name;
 
-    /**
-     * The estimated time of the node in milliseconds by the user.
-     */
-    @Column(nullable = false)
-    private double expectedExecTime;
+	/**
+	 * The estimated time of the node in milliseconds by the user.
+	 */
+	@Column(nullable = false)
+	private double expectedExecTime;
 
-    @OneToMany(mappedBy = "node", fetch = FetchType.LAZY)
-    private Set<Behavior> behaviors = new HashSet<>();
+	@OneToMany(mappedBy = "node", fetch = FetchType.LAZY)
+	private Set<Behavior> behaviors = new HashSet<>();
 
-    @JsonIgnore
-    @ManyToOne
-    private Model model;
+	@JsonIgnore
+	@ManyToOne
+	private Model model;
 
 }

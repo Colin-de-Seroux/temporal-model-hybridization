@@ -12,30 +12,27 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "models", indexes = {
-    @Index(name = "idx_model_name", columnList = "name")
-})
+@Table(name = "models", indexes = { @Index(name = "idx_model_name", columnList = "name") })
 public class Model {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+	@Column(nullable = false, unique = true)
+	private String name;
 
-    @OneToMany(mappedBy = "model", fetch = FetchType.LAZY)
-    private Set<Node> nodes = new HashSet<>();
+	@OneToMany(mappedBy = "model", fetch = FetchType.LAZY)
+	private Set<Node> nodes = new HashSet<>();
 
-    public Model(String name) {
-        this.name = name;
-    }
+	public Model(String name) {
+		this.name = name;
+	}
 
 }
