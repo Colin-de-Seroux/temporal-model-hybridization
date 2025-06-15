@@ -105,7 +105,7 @@ Delete Logs directory before restarting the build.
 [Python API for predictions (tgnn_service)](ai/tgnn/README.md)
 
 ## Feedback
+
 [Project limitations](docs/reports/limitations.md)
 
 [List of Improvements](docs/reports/improvements.md)
-
