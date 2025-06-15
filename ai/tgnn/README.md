@@ -127,3 +127,10 @@ python __main__.py
 cd tgnn_service
 python run.py
 ```
+### Launch prediction without tgnn_service
+
+
+```bash
+cd tgnn_project
+python main_predict.py
+```
