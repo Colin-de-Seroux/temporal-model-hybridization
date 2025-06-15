@@ -1,6 +1,8 @@
-torch_geometric
-torch_geometric_temporal
-pandas
+torch-geometric
+torch-geometric-temporal
 numpy
+pandas
+Flask
+Flask-Cors
 scikit-learn
 matplotlib
