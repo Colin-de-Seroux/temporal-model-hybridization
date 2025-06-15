@@ -1,4 +1,6 @@
 action_system
+logger info
+loopNbTime 333.333
 
 node ActionClient
   expectedExecTime 10 ms

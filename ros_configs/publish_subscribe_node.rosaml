@@ -1,5 +1,6 @@
 publish_subscribe_node
 logger info
+loopNbTime 333.333
 
 node PubSub
 expectedExecTime 5.0 ms
