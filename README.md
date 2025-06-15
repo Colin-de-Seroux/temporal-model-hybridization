@@ -68,7 +68,7 @@ Delete Logs.
 
 ## Architecture
 
-![architecture](readme_pictures/architecture2.png)
+![architecture](readme_pictures/architecture.png)
 
 
 [AI utilization](ai/tgnn/README.md)
