@@ -51,10 +51,10 @@ Trigger:
     StateChanged;
 
 MessageReceived:
-    'messageReceived' topic=ID;
+    'messageReceived' topic=ID ('predicted' predictedTime=DOUBLE 'ms')?;
 
 TimerElapsed:
-    'timerElapsed' timer=ID?;
+    'timerElapsed' timer=ID? ('predicted' predictedTime=DOUBLE 'ms')?;
 
 ServiceRequest:
     'serviceRequest' service=ID;
@@ -77,7 +77,7 @@ Action:
     SendActionGoal ;
 
 SendMessage:
-    'sendMessage' topic=ID message=STRING ('qos' qos=QoS)?;
+    'sendMessage' topic=ID message=STRING ('qos' qos=QoS)? ('predicted' predictedTime=DOUBLE 'ms')?;
 
 LogMessage:
     'log' level=LEVEL message=STRING;
