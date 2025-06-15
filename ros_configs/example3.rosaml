@@ -1,5 +1,6 @@
 example3
 logger info training
+loopNbTime 333.333
 
 node Publisher
 expectedExecTime 1.0 ms

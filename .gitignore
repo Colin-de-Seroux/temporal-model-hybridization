@@ -6,12 +6,18 @@
 # Postgres
 /postgres/data/
 
+# Environment
 .env
 .venv
+__pycache__/
 
+# Logs
 TE_logs
 Logs/*
+
+# Building
 ros2/src/*
 
-__pycache__/
+# Data
+*.csv
 save/

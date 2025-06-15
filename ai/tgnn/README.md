@@ -1,54 +1,82 @@
-# Before using tgnn 
+# Before using tgnn
 
-placed in /tgnn :
+Placed in `/tgnn` :
 
-1. create .venv
+1. Create `.venv`
 
-2. activate it :
+2. Activate it :
+
 ```bash
 .\.venv\Scripts\activate
 ```
-[pytorch Start Locally](https://pytorch.org/get-started/locally/)
 
-Install dependencies : 
+3. Run `nvcc --version` and get the good cuda version on pytorch for your version :
+
+```bash
+nvcc --version
+```
+
+[Pytorch website](https://pytorch.org/get-started/locally/)
+
+4. Install dependencies :
+
+a. Manually :
+
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
+
 ```bash
 pip install -r requirements.txt
-
 ```
 
-setup.sh has all the dependancies to install
+b. With `.sh` :
 
-# Training
-## Description
-Input : 
+Setup.sh has all the dependancies to install (change cuda version before).
+
+```bash
+./setup.sh
+```
+
+## Training
+
+### Description
+
+Input :
+
 - csv with datas froms simulations
 
-Output : 
-- save the model trained in save/model.pth
-- save/feature_scaler.pkl
-- save/target_scaler.pkl
+Output :
 
-## Launch tgnn_project
+- save the model trained in `save/model.pth`
+- `save/feature_scaler.pkl`
+- `save/target_scaler.pkl`
+
+### Launch tgnn_project
+
 ```bash
 cd tgnn_project
 python .\__main__.py
 ```
 
-# Prediction
-## Description
-### Flask API
+## Prediction
+
+### Description
+
+#### Flask API
 
 Input :
-- save/model.pth
-- save/feature_scaler.pkl
-- save/target_scaler.pkl
+
+- `save/model.pth`
+- `save/feature_scaler.pkl`
+- `save/target_scaler.pkl`
 
 Routes :
-- `/receive-ast` : receive in tabular format the informations of `.aml` configuration 
-## Launch tgnn_service
+
+- `/receive-ast` : receive in tabular format the informations of `.aml` configuration
+
+### Launch tgnn_service
+
 ```bash
 cd tgnn_service
 python .\run.py

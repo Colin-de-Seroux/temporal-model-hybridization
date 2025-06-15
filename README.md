@@ -1,6 +1,6 @@
 # Temporal-model-hybridization
 
-##  DSL
+## DSL
 
 ```bash
 cd ros_aml
@@ -8,7 +8,7 @@ npm install
 ```
 To generate the grammar, build the project and generate all ROS 2 packages based on the `.rosaml` files in `ros_configs` : 
 ```bash
-npm run all 
+npm run all
 ```
 Exemple of **.rosaml** files can be found in `ros_configs` directory.
 

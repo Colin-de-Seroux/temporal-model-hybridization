@@ -54,6 +54,7 @@ import {
 } from './utils/utils.js';
 
 let wantLog = false;
+let loopNbTime = 333.333;
 
 export function generateRosScript(
     model: Model,
@@ -61,6 +62,11 @@ export function generateRosScript(
     destination: string | undefined
 ): string {
     wantLog = model.logger?.training !== undefined;
+    const tempLoopNbTime = model.loopNbTime?.value;
+
+    if (tempLoopNbTime !== undefined && !isNaN(Number(tempLoopNbTime))) {
+        loopNbTime = Number(tempLoopNbTime);
+    }
 
     const data = extractDestinationAndName(filePath, destination);
     const pkgName = camelCaseToSnakeCase(data.name);
@@ -310,7 +316,17 @@ function generateCallServiceCode(
         b_index,
         a_index
     );
-    exec.append(`        time.sleep(${Number(execTime) / 1000}) `);
+    // 333 333 = 1s for my computer
+    // Change for your computer
+    exec.append('        j = 0');
+    exec.appendNewLine();
+    exec.appendNewLine();
+    exec.append(
+        `        while j < ${Math.ceil(loopNbTime * Number(execTime))}:`
+    );
+    exec.appendNewLine();
+    exec.append('            j += 1');
+    exec.appendNewLine();
     log_with_timer(
         wantLog,
         exec,
@@ -401,7 +417,17 @@ function generateSendActionGoalCode(
         a_index
     );
     const execTime = action.expectedTime;
-    exec.append(`        time.sleep(${Number(execTime) / 1000}) `);
+    // 333 333 = 1s for my computer
+    // Change for your computer
+    exec.append('        j = 0');
+    exec.appendNewLine();
+    exec.appendNewLine();
+    exec.append(
+        `        while j < ${Math.ceil(loopNbTime * Number(execTime))}:`
+    );
+    exec.appendNewLine();
+    exec.append('            j += 1');
+    exec.appendNewLine();
     log_with_timer(
         wantLog,
         exec,

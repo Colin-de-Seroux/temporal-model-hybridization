@@ -1,9 +1,15 @@
-# Temporal time series Microservice
+# Temporal time series micro service
+
+## Run locally
+
 ```sh
 mvn install:install-file -Dfile='src/main/libs/logger-0.0.1-SNAPSHOT.jar' -DgroupId='fr.phenix333' -DartifactId=logger -Dversion='0.0.1-SNAPSHOT' -Dpackaging=jar
 ```
 
-Launch API and Postgres database with [docker_compose file (images : postgres & temporal_time_series_ms)](../docker-compose.yml).
+```sh
+mvn spring-boot:run
+```
 
-Once the containers are running, the Swagger UI for the microservice is available at :
-http://localhost:3001/swagger.html
+## Swagger
+
+[Swagger locally](./src/main/resources/static/swagger.yml) or [Swagger in web](http://loaclhost:3001/swagger.html)

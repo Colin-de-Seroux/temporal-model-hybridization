@@ -1,5 +1,6 @@
 subscriberSystem
 logger info
+loopNbTime 333.333
 
 node Subscriber
     expectedExecTime 5.0 ms

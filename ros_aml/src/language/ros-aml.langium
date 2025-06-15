@@ -3,6 +3,7 @@ grammar RosAml
 entry Model:
     systemName=ID?
     logger=LoggerLevel?
+    loopNbTime=LoopNbTime?
     nodes+=Node*
     constraints+=TemporalConstraint*
     predictedResults +=PredictedResult*;
@@ -12,6 +13,9 @@ PredictedResult:
 
 LoggerLevel:
     'logger' level=LEVEL training="training"?;
+
+LoopNbTime:
+    'loopNbTime' value=DOUBLE;
 
 Node:
     'node' name=ID
