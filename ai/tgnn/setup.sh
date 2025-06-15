@@ -5,10 +5,10 @@
 
 pip install --upgrade pip
 
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.7.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.7.0+cu118.html
 
 pip install torch-geometric
-
 pip install torch-geometric-temporal
 
 pip install numpy
@@ -17,6 +17,5 @@ pip install Flask
 pip install Flask-Cors
 pip install scikit-learn
 pip install matplotlib
-
 
 echo "Installation terminée avec succès !"

@@ -10,7 +10,7 @@ Placed in `/tgnn` :
 .\.venv\Scripts\activate
 ```
 
-3. Run `nvcc --version` and get the good cuda version on pytorch for your version :
+3. Run `nvcc --version` and get the good cuda version on pytorch for your version (you can use 11.8 with cuda 12.6) :
 
 ```bash
 nvcc --version
@@ -23,7 +23,11 @@ nvcc --version
 a. Manually :
 
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.7.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+```bash
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.7.0+cu118.html
 ```
 
 ```bash
@@ -32,7 +36,7 @@ pip install -r requirements.txt
 
 b. With `.sh` :
 
-Setup.sh has all the dependancies to install (change cuda version before).
+Setup.sh has all the dependancies to install.
 
 ```bash
 ./setup.sh
@@ -64,7 +68,7 @@ ERROR: Failed to build installable wheels for some pyproject.toml based projects
 
 **Input :**
 
-- csv with datas froms simulations
+- csv with datas froms simulations save in `dataset/dataset.csv`
 
 **Output :**
 
@@ -78,12 +82,12 @@ ERROR: Failed to build installable wheels for some pyproject.toml based projects
 
 **Graph nodes :**
 
-Represent ROS 2 *actions* or *triggers*: `Publisher`, `Subscriber`, `Timer` ...
+Represent ROS 2 _actions_ or _triggers_: `Publisher`, `Subscriber`, `Timer` ...
 
 **Graph edges :**
 
-- **Topic connections** (e.g., a `Publisher` connected to a `Subscriber`) with *edge weight = abs(subscriber_execution_time - publisher_execution_time)*
-- **Timer-based triggers** (e.g., a `Timer` connected to a `Publisher`) with *edge weight = abs(publisher_execution_time - timer_execution_time)*
+- **Topic connections** (e.g., a `Publisher` connected to a `Subscriber`) with _edge weight = abs(subscriber_execution_time - publisher_execution_time)_
+- **Timer-based triggers** (e.g., a `Timer` connected to a `Publisher`) with _edge weight = abs(publisher_execution_time - timer_execution_time)_
 
 The graph is **dynamic** over time, **new actions** may **appear/desappear** and **connections** may **change** (based on **active topics** or **triggered timers**).
 
@@ -92,13 +96,13 @@ The graph is **dynamic** over time, **new actions** may **appear/desappear** and
 - The **graph** of active ROS 2 actions/triggers at time `t`
 - The **edges** (topics/timers) and their weights
 - Node **features** : all dataset columns except `ExecutionTime`
-- **Target** values : execution time 
+- **Target** values : execution time
 
 ### Launch tgnn_project
 
 ```bash
 cd tgnn_project
-python .\__main__.py
+python __main__.py
 ```
 
 ## Prediction
@@ -121,5 +125,5 @@ python .\__main__.py
 
 ```bash
 cd tgnn_service
-python .\run.py
+python run.py
 ```
