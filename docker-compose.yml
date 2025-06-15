@@ -18,31 +18,6 @@ services:
       tmh-net:
         ipv4_address: 172.35.0.2
 
-  # temporal_execution:
-  #   image: temporal_execution
-  #   build:
-  #     context: ./ros2/src/temporal_execution
-  #     dockerfile: Dockerfile
-  #   container_name: temporal_execution
-  #   environment:
-  #     - RCUTILS_LOGGING_USE_STDERR=0 # Logs STDERR
-  #     - RCUTILS_LOGGING_USE_STDOUT=0 # Logs STDOUT
-  #     - RCUTILS_LOGGING_IMPLEMENTATION=rcutils_logging_file
-  #     - ROS_HOME=/ros2_ws/.ros
-  #   volumes:
-  #     - ./ros2/src/temporal_execution/Logs:/ros_logs_backup
-  #   tmpfs:
-  #     - /ros2_ws/.ros/log # To RAM
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 200M
-  #       reservations:
-  #         cpus: "1"
-  #         memory: 200M
-  #   command: /entrypoint.sh
-
   temporal_time_series_ms:
     image: temporal_time_series_ms
     build:
