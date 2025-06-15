@@ -2,6 +2,7 @@
 ## Description
 RosAml is a **domain specific language (DSL)** to express the expected temporal behaviors as well as the various ROS 2 componentsand their configurations to be generated.
 
+![Instructions to use it](../README.md)
 
 ## Grammar
 
@@ -13,7 +14,7 @@ The `RosAml` grammar allows to define:
     - Parameters 
     - States
     - Timer 
-    - Behavior (when <trigger> do <actions+>)
+    - Behavior (when < trigger > do < actions+ >)
     - Expected execution time per node
 - Triggers of behavior : Message received, timer elapsed, service request, parameter change, etc.
 - Actions that node can take: Message publication, logging, service call, parameter or state update, action goal sending
