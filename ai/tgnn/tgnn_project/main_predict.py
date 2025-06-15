@@ -2,15 +2,16 @@ import torch
 import joblib
 import os
 from tgnn_project.model import GConvGRUModel
-from tgnn_project.data_loader import create_dataset
-from tgnn_project.train import predict
+from tgnn_project.dataset import create_dataset
+from tgnn_project.predict import predict
+import config
 
 def main():
-    dataset_path = os.path.join("..", "dataset", "predict_dataset.csv")
-    save_dir = os.path.join("..", "save")
-    feature_scaler_path = os.path.join(save_dir, "feature_scaler.pkl")
-    target_scaler_path = os.path.join(save_dir, "target_scaler.pkl")
-    model_path = os.path.join(save_dir, "model.pth")
+    dataset_path =config.PREDICT_DATASET_PATH 
+    save_dir = config.SAVE_DIR 
+    feature_scaler_path = config.FEATURE_SCALER_PATH
+    target_scaler_path = config.TARGET_SCALER_PATH
+    model_path = config.MODEL_PATH
 
     dataset = create_dataset(dataset_path, is_prediction=True)
 
@@ -21,7 +22,8 @@ def main():
     model.load_state_dict(torch.load(model_path))
     print("✅ Model loaded successfully.")
 
-    predict(model, dataset, feature_scaler, target_scaler)
+    predictions = predict(model, dataset, feature_scaler, target_scaler)
+    print("Predictions:", predictions)
 
 if __name__ == "__main__":
     print("Prediction")
