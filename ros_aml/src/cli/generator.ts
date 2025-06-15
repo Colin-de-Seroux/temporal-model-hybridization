@@ -54,6 +54,7 @@ import {
 } from './utils/utils.js';
 
 let wantLog = false;
+let loopNbTime = 333.333;
 
 export function generateRosScript(
     model: Model,
@@ -61,6 +62,11 @@ export function generateRosScript(
     destination: string | undefined
 ): string {
     wantLog = model.logger?.training !== undefined;
+    const tempLoopNbTime = model.loopNbTime?.value;
+
+    if (tempLoopNbTime !== undefined && !isNaN(Number(tempLoopNbTime))) {
+        loopNbTime = Number(tempLoopNbTime);
+    }
 
     const data = extractDestinationAndName(filePath, destination);
     const pkgName = camelCaseToSnakeCase(data.name);
@@ -315,7 +321,9 @@ function generateCallServiceCode(
     exec.append('        j = 0');
     exec.appendNewLine();
     exec.appendNewLine();
-    exec.append(`        while j < ${Math.ceil(333.333 * Number(execTime))}:`);
+    exec.append(
+        `        while j < ${Math.ceil(loopNbTime * Number(execTime))}:`
+    );
     exec.appendNewLine();
     exec.append('            j += 1');
     exec.appendNewLine();
@@ -414,7 +422,9 @@ function generateSendActionGoalCode(
     exec.append('        j = 0');
     exec.appendNewLine();
     exec.appendNewLine();
-    exec.append(`        while j < ${Math.ceil(333.333 * Number(execTime))}:`);
+    exec.append(
+        `        while j < ${Math.ceil(loopNbTime * Number(execTime))}:`
+    );
     exec.appendNewLine();
     exec.append('            j += 1');
     exec.appendNewLine();
